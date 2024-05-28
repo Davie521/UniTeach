@@ -18,6 +18,8 @@ final class SettingsModel: ObservableObject {
 
 
 struct SettingView: View {
+    
+    @Environment(\.dismiss) private var dismiss
 
     @Binding var showLogInView: Bool
     @StateObject private var model = SettingsModel()
@@ -35,11 +37,11 @@ struct SettingView: View {
                         do {
                             try model.logOut()
                             showLogInView = true
+                            dismiss()
                         } catch {
                             print(error)
                         }
                     }
-                    
                 }
             }
             .navigationBarTitle("Settings")

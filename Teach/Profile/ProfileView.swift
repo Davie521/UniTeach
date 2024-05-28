@@ -8,6 +8,7 @@
 import SwiftUI
 
 final class ProfileViewModel: ObservableObject {
+    
     @Published var user: DatabaseUser?
     @Published var isLoading = false
     @Published var errorMessage: String?
@@ -22,6 +23,14 @@ final class ProfileViewModel: ObservableObject {
         } catch {
             errorMessage = "Failed to load user data: \(error.localizedDescription)"
             isLoading = false
+        }
+    }
+    func toggleTeacherStatus() {
+        guard let user else { return }
+        let currentValue = !user.isTeacher
+        Task {
+            try await UserManager.shared.updateUserTeacherStatus(userId: user.userId, isTeacher: currentValue)
+            self.user = try await UserManager.shared.getUser(userId: user.userId)
         }
     }
 }
@@ -41,11 +50,19 @@ struct ProfileView: View {
                     Text("Photo URL: \(photoUrl)")
                 }
                 Text("Date Created: \(user.dateCreated, style: .date)")
+                Text("Teacher: \(user.isTeacher ? "Yes" : "No")")
             } else if viewModel.isLoading {
                 ProgressView()
             } else if let errorMessage = viewModel.errorMessage {
                 Text(errorMessage)
                     .foregroundColor(.red)
+            }
+            
+            
+            Button {
+                viewModel.toggleTeacherStatus()
+            } label: {
+                Text("register as a teacher")
             }
         }
         .task {
