@@ -1,89 +1,130 @@
 import SwiftUI
 
 struct PersonalView: View {
-    // Create a list of courses
-    @State private var userCourses = ["A level Maths", "A level Physics", "A level Chemistry", "A level Biology", "A level Computer Science", "A level Engineering"]
-    
+    var showSettings = false
     var body: some View {
-        VStack {
-            // Top horizontal section with avatar and text details
-            HStack {
-                // Align the image to the right
-                Image("avatar")
-                    .resizable()
-                    .scaledToFit()
-                    .clipShape(Circle())
-                    .overlay(Circle().stroke(Color.white, lineWidth: 4))
-                    .shadow(radius: 10)
-                    .frame(width: 100, height: 100)
-                
-                VStack(alignment: .leading) {
-                    // Use the network manager to get user name
-                    Text("Yifan")
+        ScrollView {
+            VStack {
+                VStack {
+                    Image(systemName: "person.circle.fill")
+                        .resizable()
+                        .frame(width: 100, height: 100)
+                        .foregroundColor(.gray)
+                        .padding(.bottom, 10)
+                    
+                    Text("Yifan Jiang")
                         .font(.title)
                         .fontWeight(.bold)
-                        .foregroundColor(.primary)
                     
-                    Text("Imperial College")
-                        .font(.headline)
-                        .foregroundColor(.secondary)
+                   
                 }
-                .padding(.leading, 20)
-            }
-            .padding(.top, 20)
-            
-            // Available courses section
-            HStack {
-                Spacer()
-                Spacer()
-                Text("My Courses")
-                    .font(.title2)
-                    .fontWeight(.semibold)
-                    .padding()
-                Spacer()
-                // add a button to edit
-                NavigationLink(destination: CourseEditView(userCourses: $userCourses)) {
-                    Image(systemName: "pencil")
-                        .font(.title2)
-                        .padding()
-                }
-            }
-            
-            // Create a rolling list of courses
-            ScrollView(.vertical) {
-                VStack {
-                    ForEach(userCourses, id: \.self) { course in
+                .padding(.top, 10)  // Adjust the top padding to position the avatar a bit higher
+                
+                VStack(alignment: .leading, spacing: 20) {
+                    Group {
+                        Text("Educational Details")
+                            .font(.headline)
+                        
                         HStack {
-                            Text(course)
-                                .font(.title3)
-                                .padding()
+                            VStack(alignment: .leading) {
+                                Text("Institution")
+                                    .font(.subheadline)
+                                    .foregroundColor(.gray)
+                                Text("Imperial College")
+                            }
                             Spacer()
+                            VStack(alignment: .leading) {
+                                Text("Grade/Level")
+                                    .font(.subheadline)
+                                    .foregroundColor(.gray)
+                                Text("Bachelor's Degree")
+                            }
                         }
-                        .background(Color.blue.opacity(0.1))
-                        .clipShape(RoundedRectangle(cornerRadius: 10))
-                        .shadow(radius: 5)
-                        .padding(.horizontal)
-                        .padding(.vertical, 5)
+                    }
+                    
+                    Group {
+                        Text("Courses Information")
+                            .font(.headline)
+                        
+                        HStack {
+                            VStack(alignment: .leading) {
+                                Text("Courses Enrolled")
+                                    .font(.subheadline)
+                                    .foregroundColor(.gray)
+                                Text("12")
+                            }
+                            Spacer()
+                            VStack(alignment: .leading) {
+                                Text("Courses Teaching")
+                                    .font(.subheadline)
+                                    .foregroundColor(.gray)
+                                Text("3")
+                            }
+                        }
+                    }
+                    
+                    Group {
+                        Text("Tags and Specializations")
+                            .font(.headline)
+                        
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack {
+                                TagView(tag: "Computer Science")
+                                TagView(tag: "Math")
+                                TagView(tag: "Physics")
+                                TagView(tag: "Further math")
+                            }
+                        }
+                    }
+                    
+                    Group {
+                        Text("Availability")
+                            .font(.headline)
+                        
+                        HStack {
+                            VStack(alignment: .leading) {
+                                Text("Available Times")
+                                    .font(.subheadline)
+                                    .foregroundColor(.gray)
+                                Text("Monday - Friday, 9am - 5pm")
+                            }
+                            Spacer()
+                            VStack(alignment: .leading) {
+                                Text("Timezone")
+                                    .font(.subheadline)
+                                    .foregroundColor(.gray)
+                                Text("UTC-5")
+                            }
+                        }
                     }
                 }
-                .padding(.bottom, 20)
+                .padding()
+                
+                Spacer()
             }
-            .frame(maxHeight: 140) // Adjust the height as needed
-            
-            Spacer()
+            .padding()
         }
-        .padding()
-        .background(
-            LinearGradient(gradient: Gradient(colors: [Color.white, Color.gray.opacity(0.2)]), startPoint: .top, endPoint: .bottom)
-        )
-        .cornerRadius(20)
-        .shadow(radius: 10)
-        .padding()
+                
     }
 }
 
-struct PersonalView_Previews: PreviewProvider {
+struct TagView: View {
+    var tag: String
+    
+    var body: some View {
+        Text(tag)
+            .font(.caption)  // Make the tag font smaller
+            .padding(.horizontal, 10)
+            .padding(.vertical, 5)
+            .background(Color.gray.opacity(0.2))
+            .cornerRadius(10)
+    }
+}
+
+struct CombinedProfileView_Previews: PreviewProvider {
     static var previews: some View {
-        PersonalView()
+        NavigationStack {
+            PersonalView()
+        }
     }
 }

@@ -58,12 +58,6 @@ struct ProfileView: View {
                     .foregroundColor(.red)
             }
             
-            
-            Button {
-                viewModel.toggleTeacherStatus()
-            } label: {
-                Text("register as a teacher")
-            }
         }
         .task {
             await viewModel.loadCurrentUser()
