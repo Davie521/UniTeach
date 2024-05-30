@@ -104,7 +104,7 @@ struct PersonalView: View {
             }
             .padding()
         }
-                
+        
     }
 }
 
