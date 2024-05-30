@@ -8,10 +8,10 @@
 
 /* Begin PBXBuildFile section */
 		DD2D16B82C06440200C31F60 /* PersonalView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD2D16B72C06440200C31F60 /* PersonalView.swift */; };
-		DD2D16BA2C06441D00C31F60 /* CourseEditView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD2D16B92C06441D00C31F60 /* CourseEditView.swift */; };
 		DD2D16BC2C0674AD00C31F60 /* SearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD2D16BB2C0674AD00C31F60 /* SearchView.swift */; };
 		DD2D16BE2C067B9E00C31F60 /* DesktopView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD2D16BD2C067B9E00C31F60 /* DesktopView.swift */; };
 		DD359B112C04CBDE007E28BA /* UserManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD359B102C04CBDE007E28BA /* UserManager.swift */; };
+		DD6622882C08C60000B5ABBA /* AuthenticationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD6622872C08C60000B5ABBA /* AuthenticationManager.swift */; };
 		DD761A732C04B9CF00F024AA /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = DD761A722C04B9CF00F024AA /* FirebaseFirestore */; };
 		DD761A752C04B9CF00F024AA /* FirebaseFirestoreSwift in Frameworks */ = {isa = PBXBuildFile; productRef = DD761A742C04B9CF00F024AA /* FirebaseFirestoreSwift */; };
 		DD761A792C04BB3400F024AA /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD761A782C04BB3400F024AA /* ProfileView.swift */; };
@@ -25,17 +25,16 @@
 		DDC196602C0373B000403717 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = DDC1965F2C0373B000403717 /* FirebaseAuth */; };
 		DDC196632C03742B00403717 /* LogInView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC196622C03742B00403717 /* LogInView.swift */; };
 		DDC196652C03745A00403717 /* SignUpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC196642C03745A00403717 /* SignUpView.swift */; };
-		DDC196672C03757A00403717 /* AuthenticationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC196662C03757A00403717 /* AuthenticationManager.swift */; };
 		DDC196692C0380D600403717 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC196682C0380D600403717 /* RootView.swift */; };
 		DDC1966B2C03840200403717 /* SettingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC1966A2C03840200403717 /* SettingView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		DD2D16B72C06440200C31F60 /* PersonalView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PersonalView.swift; sourceTree = "<group>"; };
-		DD2D16B92C06441D00C31F60 /* CourseEditView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = CourseEditView.swift; path = ../../../swift/UniTeach/UniTeachapp/Homepage/CourseEditView.swift; sourceTree = "<group>"; };
 		DD2D16BB2C0674AD00C31F60 /* SearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchView.swift; sourceTree = "<group>"; };
 		DD2D16BD2C067B9E00C31F60 /* DesktopView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesktopView.swift; sourceTree = "<group>"; };
 		DD359B102C04CBDE007E28BA /* UserManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserManager.swift; sourceTree = "<group>"; };
+		DD6622872C08C60000B5ABBA /* AuthenticationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationManager.swift; sourceTree = "<group>"; };
 		DD761A782C04BB3400F024AA /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		DDC196462C03709B00403717 /* Teach.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Teach.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DDC196492C03709B00403717 /* TeachApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeachApp.swift; sourceTree = "<group>"; };
@@ -45,7 +44,6 @@
 		DDC196572C03718800403717 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		DDC196622C03742B00403717 /* LogInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogInView.swift; sourceTree = "<group>"; };
 		DDC196642C03745A00403717 /* SignUpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignUpView.swift; sourceTree = "<group>"; };
-		DDC196662C03757A00403717 /* AuthenticationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AuthenticationManager.swift; path = ../../../../Documents/AuthenticationManager.swift; sourceTree = "<group>"; };
 		DDC196682C0380D600403717 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		DDC1966A2C03840200403717 /* SettingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -77,7 +75,6 @@
 		DD761A762C04BA5900F024AA /* CoreView */ = {
 			isa = PBXGroup;
 			children = (
-				DD2D16B92C06441D00C31F60 /* CourseEditView.swift */,
 				DD2D16B72C06440200C31F60 /* PersonalView.swift */,
 				DDC1966A2C03840200403717 /* SettingView.swift */,
 				DDC196682C0380D600403717 /* RootView.swift */,
@@ -148,7 +145,7 @@
 			children = (
 				DDC196622C03742B00403717 /* LogInView.swift */,
 				DDC196642C03745A00403717 /* SignUpView.swift */,
-				DDC196662C03757A00403717 /* AuthenticationManager.swift */,
+				DD6622872C08C60000B5ABBA /* AuthenticationManager.swift */,
 			);
 			path = Authentication;
 			sourceTree = "<group>";
@@ -241,10 +238,9 @@
 				DD2D16BC2C0674AD00C31F60 /* SearchView.swift in Sources */,
 				DDC196652C03745A00403717 /* SignUpView.swift in Sources */,
 				DDC196632C03742B00403717 /* LogInView.swift in Sources */,
+				DD6622882C08C60000B5ABBA /* AuthenticationManager.swift in Sources */,
 				DDC196692C0380D600403717 /* RootView.swift in Sources */,
 				DDC1964C2C03709B00403717 /* ContentView.swift in Sources */,
-				DDC196672C03757A00403717 /* AuthenticationManager.swift in Sources */,
-				DD2D16BA2C06441D00C31F60 /* CourseEditView.swift in Sources */,
 				DD2D16BE2C067B9E00C31F60 /* DesktopView.swift in Sources */,
 				DDC1964A2C03709B00403717 /* TeachApp.swift in Sources */,
 			);
