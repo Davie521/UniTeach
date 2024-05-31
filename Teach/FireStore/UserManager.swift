@@ -14,7 +14,16 @@ struct DatabaseUser: Codable {
     let email: String
     let photoUrl: String?
     let dateCreated: Date
+    var userName: String
     var isTeacher: Bool
+    var university: String
+    var enrolledCourseNumber: Int
+    var teachingCourseNumber: Int
+    var tags: [String]
+    var availability: String
+    
+    
+    
     
     init(auth: AuthDataResultModel) {
         self.userId = auth.uid
@@ -22,20 +31,12 @@ struct DatabaseUser: Codable {
         self.photoUrl = auth.photoUrl
         self.dateCreated = Date()
         self.isTeacher = false
-    }
-    
-    init(
-        userId: String,
-        email: String,
-        photoUrl: String? = nil,
-        dateCreated: Date? = nil,
-        isTeacher: Bool? = nil
-    ) {
-        self.userId = userId
-        self.email = email
-        self.photoUrl = photoUrl
-        self.dateCreated = dateCreated ?? Date()
-        self.isTeacher = isTeacher ?? false
+        self.university = ""
+        self.enrolledCourseNumber = 0
+        self.teachingCourseNumber = 0
+        self.tags = []
+        self.availability = ""
+        self.userName = "Student"
     }
     
     mutating func updateTeacherStatus() {
@@ -82,6 +83,8 @@ final class UserManager {
         ]
         try await userDocument(userId: userId).updateData(data)
     }
+    
+    
  
 
 

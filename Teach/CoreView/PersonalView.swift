@@ -1,8 +1,29 @@
 import SwiftUI
 
+final class PersonalViewModel: ObservableObject {
+    @Published var user: DatabaseUser?
+    @Published var isLoading = false
+    @Published var errorMessage: String?
+
+    func loadCurrentUser() async {
+        isLoading = true
+        errorMessage = nil
+        do {
+            let authDataResult = try AuthenticationManager.shared.getAuthenticatedUser()
+            user = try await UserManager.shared.getUser(userId: authDataResult.uid)
+        } catch {
+            errorMessage = "Failed to load user data: \(error.localizedDescription)"
+        }
+        isLoading = false
+    }
+}
+
 struct PersonalView: View {
-    var showSettings = false
+    @StateObject var viewModel = PersonalViewModel()
+    
+
     var body: some View {
+        let user = viewModel.user
         ScrollView {
             VStack {
                 VStack {
@@ -11,109 +32,106 @@ struct PersonalView: View {
                         .frame(width: 100, height: 100)
                         .foregroundColor(.gray)
                         .padding(.bottom, 10)
-                    
-                    Text("Yifan Jiang")
+
+                    Text(user?.userName ?? "Default")
                         .font(.title)
                         .fontWeight(.bold)
-                    
-                   
                 }
-                .padding(.top, 10)  // Adjust the top padding to position the avatar a bit higher
-                
-                VStack(alignment: .leading, spacing: 20) {
-                    Group {
-                        Text("Educational Details")
-                            .font(.headline)
-                        
-                        HStack {
-                            VStack(alignment: .leading) {
-                                Text("Institution")
-                                    .font(.subheadline)
-                                    .foregroundColor(.gray)
-                                Text("Imperial College")
-                            }
-                            Spacer()
-                            VStack(alignment: .leading) {
-                                Text("Grade/Level")
-                                    .font(.subheadline)
-                                    .foregroundColor(.gray)
-                                Text("Bachelor's Degree")
-                            }
-                        }
-                    }
-                    
-                    Group {
-                        Text("Courses Information")
-                            .font(.headline)
-                        
-                        HStack {
-                            VStack(alignment: .leading) {
-                                Text("Courses Enrolled")
-                                    .font(.subheadline)
-                                    .foregroundColor(.gray)
-                                Text("12")
-                            }
-                            Spacer()
-                            VStack(alignment: .leading) {
-                                Text("Courses Teaching")
-                                    .font(.subheadline)
-                                    .foregroundColor(.gray)
-                                Text("3")
-                            }
-                        }
-                    }
-                    
-                    Group {
-                        Text("Tags and Specializations")
-                            .font(.headline)
-                        
-                        ScrollView(.horizontal, showsIndicators: false) {
+                .padding(.top, 10)
+
+                if viewModel.isLoading {
+                    ProgressView("Loading...")
+                        .padding()
+                } else if let errorMessage = viewModel.errorMessage {
+                    Text(errorMessage)
+                        .foregroundColor(.red)
+                        .padding()
+                } else {
+                    VStack(alignment: .leading, spacing: 20) {
+                        Group {
+                            Text("Educational Details")
+                                .font(.headline)
+
                             HStack {
-                                TagView(tag: "Computer Science")
-                                TagView(tag: "Math")
-                                TagView(tag: "Physics")
-                                TagView(tag: "Further math")
+                                VStack(alignment: .leading) {
+                                    Text("Institution")
+                                        .font(.subheadline)
+                                        .foregroundColor(.gray)
+                                    Text(user?.university ?? "Imperial College")
+                                }
+                                Spacer()
+                            }
+                        }
+
+                        Group {
+                            Text("Courses Information")
+                                .font(.headline)
+
+                            HStack {
+                                VStack(alignment: .leading) {
+                                    Text("Courses Enrolled")
+                                        .font(.subheadline)
+                                        .foregroundColor(.gray)
+                                    Text("\(String(describing: user?.enrolledCourseNumber))")
+                                }
+                                Spacer()
+                                VStack(alignment: .leading) {
+                                    Text("Courses Teaching")
+                                        .font(.subheadline)
+                                        .foregroundColor(.gray)
+                                    Text("\(String(describing: user?.teachingCourseNumber))")
+                                }
+                            }
+                        }
+
+                        Group {
+                            Text("Tags and Specializations")
+                                .font(.headline)
+
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack {
+                                    TagView(tag: "Computer Science")
+                                    TagView(tag: "Math")
+                                    TagView(tag: "Physics")
+                                    TagView(tag: "Further math")
+                                }
+                            }
+                        }
+
+                        Group {
+                            Text("Availability")
+                                .font(.headline)
+
+                            HStack {
+                                VStack(alignment: .leading) {
+                                    Text("Available Times")
+                                        .font(.subheadline)
+                                        .foregroundColor(.gray)
+                                    Text(user?.availability ?? "Monday to Friday 9 - 17")
+                                }
+                                Spacer()
                             }
                         }
                     }
-                    
-                    Group {
-                        Text("Availability")
-                            .font(.headline)
-                        
-                        HStack {
-                            VStack(alignment: .leading) {
-                                Text("Available Times")
-                                    .font(.subheadline)
-                                    .foregroundColor(.gray)
-                                Text("Monday - Friday, 9am - 5pm")
-                            }
-                            Spacer()
-                            VStack(alignment: .leading) {
-                                Text("Timezone")
-                                    .font(.subheadline)
-                                    .foregroundColor(.gray)
-                                Text("UTC-5")
-                            }
-                        }
-                    }
+                    .padding()
                 }
-                .padding()
-                
+
                 Spacer()
             }
             .padding()
         }
-        
+        .task {
+            await viewModel.loadCurrentUser()
+        }
     }
 }
 
 struct TagView: View {
     var tag: String
-    
+
     var body: some View {
         Text(tag)
-            .font(.caption)  // Make the tag font smaller
+            .font(.caption)
             .padding(.horizontal, 10)
             .padding(.vertical, 5)
             .background(Color.gray.opacity(0.2))

@@ -15,11 +15,11 @@
 		DD761A732C04B9CF00F024AA /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = DD761A722C04B9CF00F024AA /* FirebaseFirestore */; };
 		DD761A752C04B9CF00F024AA /* FirebaseFirestoreSwift in Frameworks */ = {isa = PBXBuildFile; productRef = DD761A742C04B9CF00F024AA /* FirebaseFirestoreSwift */; };
 		DD761A792C04BB3400F024AA /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD761A782C04BB3400F024AA /* ProfileView.swift */; };
+		DD9BBD7F2C0A2BE60062EA1B /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = DD9BBD7E2C0A2BE60062EA1B /* GoogleService-Info.plist */; };
 		DDC1964A2C03709B00403717 /* TeachApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC196492C03709B00403717 /* TeachApp.swift */; };
 		DDC1964C2C03709B00403717 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC1964B2C03709B00403717 /* ContentView.swift */; };
 		DDC1964E2C03709C00403717 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DDC1964D2C03709C00403717 /* Assets.xcassets */; };
 		DDC196512C03709C00403717 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DDC196502C03709C00403717 /* Preview Assets.xcassets */; };
-		DDC196582C03718800403717 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = DDC196572C03718800403717 /* GoogleService-Info.plist */; };
 		DDC1965B2C0371B700403717 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = DDC1965A2C0371B700403717 /* FirebaseAnalytics */; };
 		DDC1965D2C0371B700403717 /* FirebaseAnalyticsSwift in Frameworks */ = {isa = PBXBuildFile; productRef = DDC1965C2C0371B700403717 /* FirebaseAnalyticsSwift */; };
 		DDC196602C0373B000403717 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = DDC1965F2C0373B000403717 /* FirebaseAuth */; };
@@ -36,12 +36,12 @@
 		DD359B102C04CBDE007E28BA /* UserManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserManager.swift; sourceTree = "<group>"; };
 		DD6622872C08C60000B5ABBA /* AuthenticationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationManager.swift; sourceTree = "<group>"; };
 		DD761A782C04BB3400F024AA /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
+		DD9BBD7E2C0A2BE60062EA1B /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../../../Downloads/GoogleService-Info.plist"; sourceTree = "<group>"; };
 		DDC196462C03709B00403717 /* Teach.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Teach.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DDC196492C03709B00403717 /* TeachApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeachApp.swift; sourceTree = "<group>"; };
 		DDC1964B2C03709B00403717 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		DDC1964D2C03709C00403717 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		DDC196502C03709C00403717 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
-		DDC196572C03718800403717 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		DDC196622C03742B00403717 /* LogInView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogInView.swift; sourceTree = "<group>"; };
 		DDC196642C03745A00403717 /* SignUpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignUpView.swift; sourceTree = "<group>"; };
 		DDC196682C0380D600403717 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
@@ -116,7 +116,7 @@
 				DD761A772C04BAAB00F024AA /* Profile */,
 				DD761A762C04BA5900F024AA /* CoreView */,
 				DDC196612C03740B00403717 /* Authentication */,
-				DDC196572C03718800403717 /* GoogleService-Info.plist */,
+				DD9BBD7E2C0A2BE60062EA1B /* GoogleService-Info.plist */,
 				DDC196492C03709B00403717 /* TeachApp.swift */,
 				DDC1964B2C03709B00403717 /* ContentView.swift */,
 				DDC1964D2C03709C00403717 /* Assets.xcassets */,
@@ -219,8 +219,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				DDC196512C03709C00403717 /* Preview Assets.xcassets in Resources */,
+				DD9BBD7F2C0A2BE60062EA1B /* GoogleService-Info.plist in Resources */,
 				DDC1964E2C03709C00403717 /* Assets.xcassets in Resources */,
-				DDC196582C03718800403717 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
