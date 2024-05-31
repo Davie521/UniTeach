@@ -59,7 +59,7 @@ struct StudentRecommendationsView: View {
     var body: some View {
         VStack(alignment: .leading) {
             HStack {
-                Text("Recommendations")
+                Text("My Recommendations")
                     .font(.title2)
                     .bold()
                 Spacer()

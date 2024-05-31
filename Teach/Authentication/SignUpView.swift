@@ -12,6 +12,7 @@ final class SignUpEmailModel: ObservableObject {
     @Published var password = ""
     @Published var confirmPassword = ""
     @Published var errorMessage: String? = nil
+    @Published var SuccessfulSignUp = false
     
     
     func signUp() async throws {
@@ -95,7 +96,7 @@ struct SignUpView: View {
                     Task {
                         do {
                             try await model.signUp()
-                            navigateToLogin = true
+                            navigateToLogin = model.SuccessfulSignUp
                         } catch {
                             print(error)
                         }
