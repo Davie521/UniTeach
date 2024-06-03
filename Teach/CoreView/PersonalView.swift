@@ -105,10 +105,9 @@ struct PersonalView: View {
                             
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack {
-                                    TagView(tag: "Computer Science")
-                                    TagView(tag: "Math")
-                                    TagView(tag: "Physics")
-                                    TagView(tag: "Further math")
+                                    ForEach(user.tags, id: \.self) { tag in
+                                        TagView(tag: tag)
+                                    }
                                 }
                             }
                         }

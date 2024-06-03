@@ -14,7 +14,8 @@
 		DD6622882C08C60000B5ABBA /* AuthenticationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD6622872C08C60000B5ABBA /* AuthenticationManager.swift */; };
 		DD761A732C04B9CF00F024AA /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = DD761A722C04B9CF00F024AA /* FirebaseFirestore */; };
 		DD761A752C04B9CF00F024AA /* FirebaseFirestoreSwift in Frameworks */ = {isa = PBXBuildFile; productRef = DD761A742C04B9CF00F024AA /* FirebaseFirestoreSwift */; };
-		DD9BBD7F2C0A2BE60062EA1B /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = DD9BBD7E2C0A2BE60062EA1B /* GoogleService-Info.plist */; };
+		DD7973912C0E24570070FE42 /* ClassManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD7973902C0E24570070FE42 /* ClassManager.swift */; };
+		DD7973932C0E2A5B0070FE42 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = DD7973922C0E2A5B0070FE42 /* GoogleService-Info.plist */; };
 		DDC1964A2C03709B00403717 /* TeachApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC196492C03709B00403717 /* TeachApp.swift */; };
 		DDC1964C2C03709B00403717 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC1964B2C03709B00403717 /* ContentView.swift */; };
 		DDC1964E2C03709C00403717 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DDC1964D2C03709C00403717 /* Assets.xcassets */; };
@@ -34,7 +35,8 @@
 		DD2D16BD2C067B9E00C31F60 /* DesktopView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesktopView.swift; sourceTree = "<group>"; };
 		DD359B102C04CBDE007E28BA /* UserManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserManager.swift; sourceTree = "<group>"; };
 		DD6622872C08C60000B5ABBA /* AuthenticationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationManager.swift; sourceTree = "<group>"; };
-		DD9BBD7E2C0A2BE60062EA1B /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = "GoogleService-Info.plist"; path = "../../../Downloads/GoogleService-Info.plist"; sourceTree = "<group>"; };
+		DD7973902C0E24570070FE42 /* ClassManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClassManager.swift; sourceTree = "<group>"; };
+		DD7973922C0E2A5B0070FE42 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		DDC196462C03709B00403717 /* Teach.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Teach.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DDC196492C03709B00403717 /* TeachApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TeachApp.swift; sourceTree = "<group>"; };
 		DDC1964B2C03709B00403717 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -66,6 +68,7 @@
 			isa = PBXGroup;
 			children = (
 				DD359B102C04CBDE007E28BA /* UserManager.swift */,
+				DD7973902C0E24570070FE42 /* ClassManager.swift */,
 			);
 			path = FireStore;
 			sourceTree = "<group>";
@@ -102,10 +105,10 @@
 		DDC196482C03709B00403717 /* Teach */ = {
 			isa = PBXGroup;
 			children = (
+				DD7973922C0E2A5B0070FE42 /* GoogleService-Info.plist */,
 				DD359B0F2C04CBC9007E28BA /* FireStore */,
 				DD761A762C04BA5900F024AA /* CoreView */,
 				DDC196612C03740B00403717 /* Authentication */,
-				DD9BBD7E2C0A2BE60062EA1B /* GoogleService-Info.plist */,
 				DDC196492C03709B00403717 /* TeachApp.swift */,
 				DDC1964B2C03709B00403717 /* ContentView.swift */,
 				DDC1964D2C03709C00403717 /* Assets.xcassets */,
@@ -208,8 +211,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				DDC196512C03709C00403717 /* Preview Assets.xcassets in Resources */,
-				DD9BBD7F2C0A2BE60062EA1B /* GoogleService-Info.plist in Resources */,
 				DDC1964E2C03709C00403717 /* Assets.xcassets in Resources */,
+				DD7973932C0E2A5B0070FE42 /* GoogleService-Info.plist in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -227,6 +230,7 @@
 				DDC196652C03745A00403717 /* SignUpView.swift in Sources */,
 				DDC196632C03742B00403717 /* LogInView.swift in Sources */,
 				DD6622882C08C60000B5ABBA /* AuthenticationManager.swift in Sources */,
+				DD7973912C0E24570070FE42 /* ClassManager.swift in Sources */,
 				DDC196692C0380D600403717 /* RootView.swift in Sources */,
 				DDC1964C2C03709B00403717 /* ContentView.swift in Sources */,
 				DD2D16BE2C067B9E00C31F60 /* DesktopView.swift in Sources */,

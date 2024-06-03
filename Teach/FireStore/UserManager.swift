@@ -99,9 +99,7 @@ final class UserManager {
     }
     func updateUser(user: DatabaseUser) async throws {
         try userDocument(userId: user.userId).setData(from: user, merge: true, encoder: encoder)
-        print(user.userId)
-        print(user.university)
-        print("User updated")
+
     }
     
  
