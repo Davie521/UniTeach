@@ -12,7 +12,7 @@ import FirebaseFirestoreSwift
 struct DatabaseUser: Codable {
     let userId: String
     let email: String
-    let photoUrl: String?
+    var photoUrl: String?
     let dateCreated: Date
     var userName: String
     var isTeacher: Bool
@@ -37,6 +37,20 @@ struct DatabaseUser: Codable {
         self.tags = []
         self.availability = ""
         self.userName = "Student"
+    }
+    
+    init(userId: String, userName: String, isTeacher: Bool, university: String, enrolledCourseNumber: Int, teachingCourseNumber: Int, tags: [String], availability: String) {
+        self.userId = userId
+        self.email = "test1@test.com"
+        self.photoUrl = nil
+        self.dateCreated = Date()
+        self.userName = userName
+        self.isTeacher = isTeacher
+        self.university = university
+        self.enrolledCourseNumber = enrolledCourseNumber
+        self.teachingCourseNumber = teachingCourseNumber
+        self.tags = tags
+        self.availability = availability
     }
     
     mutating func updateTeacherStatus() {
@@ -83,7 +97,12 @@ final class UserManager {
         ]
         try await userDocument(userId: userId).updateData(data)
     }
-    
+    func updateUser(user: DatabaseUser) async throws {
+        try userDocument(userId: user.userId).setData(from: user, merge: true, encoder: encoder)
+        print(user.userId)
+        print(user.university)
+        print("User updated")
+    }
     
  
 

@@ -22,7 +22,6 @@ final class LogInModel: ObservableObject {
             let authDataResult = try await AuthenticationManager.shared.logInUser(email: email, password: password)
             // this is the database user
             let user = DatabaseUser(auth: authDataResult)
-            try await UserManager.shared.createNewUser(user: user)
             print("Email: \(email) logged in successfully.")
             return true
         } catch {

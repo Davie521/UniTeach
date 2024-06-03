@@ -1,27 +1,41 @@
 import SwiftUI
 
 final class PersonalViewModel: ObservableObject {
-    @Published var user: DatabaseUser?
+    
+    var user: DatabaseUser
     @Published var isLoading = false
     @Published var errorMessage: String?
-
+    
+    init() {
+        user = DatabaseUser(userId: "", userName: "", isTeacher: false, university: "", enrolledCourseNumber: 0, teachingCourseNumber: 0, tags: [], availability: "")
+    }
+    
+    
     func loadCurrentUser() async {
-        isLoading = true
-        errorMessage = nil
+        DispatchQueue.main.async {
+            self.isLoading = true
+            self.errorMessage = nil
+        }
+        
         do {
             let authDataResult = try AuthenticationManager.shared.getAuthenticatedUser()
-            user = try await UserManager.shared.getUser(userId: authDataResult.uid)
+            let fetchedUser = try await UserManager.shared.getUser(userId: authDataResult.uid)
+            DispatchQueue.main.async {
+                self.user = fetchedUser
+                self.isLoading = false
+            }
         } catch {
-            errorMessage = "Failed to load user data: \(error.localizedDescription)"
+            DispatchQueue.main.async {
+                self.errorMessage = "Failed to load user data: \(error.localizedDescription)"
+                self.isLoading = false
+            }
         }
-        isLoading = false
     }
 }
 
 struct PersonalView: View {
     @StateObject var viewModel = PersonalViewModel()
     
-
     var body: some View {
         let user = viewModel.user
         ScrollView {
@@ -32,13 +46,13 @@ struct PersonalView: View {
                         .frame(width: 100, height: 100)
                         .foregroundColor(.gray)
                         .padding(.bottom, 10)
-
-                    Text(user?.userName ?? "Default")
+                    
+                    Text(user.userName)
                         .font(.title)
                         .fontWeight(.bold)
                 }
                 .padding(.top, 10)
-
+                
                 if viewModel.isLoading {
                     ProgressView("Loading...")
                         .padding()
@@ -51,43 +65,44 @@ struct PersonalView: View {
                         Group {
                             Text("Educational Details")
                                 .font(.headline)
-
+                            
                             HStack {
                                 VStack(alignment: .leading) {
                                     Text("Institution")
                                         .font(.subheadline)
                                         .foregroundColor(.gray)
-                                    Text(user?.university ?? "Imperial College")
+                                    Text(user.university)
                                 }
                                 Spacer()
                             }
                         }
-
+                        
                         Group {
                             Text("Courses Information")
                                 .font(.headline)
-
+                            
                             HStack {
                                 VStack(alignment: .leading) {
                                     Text("Courses Enrolled")
                                         .font(.subheadline)
                                         .foregroundColor(.gray)
-                                    Text("\(String(describing: user?.enrolledCourseNumber))")
+                                    Text("\(user.enrolledCourseNumber)")
+                                    
                                 }
                                 Spacer()
                                 VStack(alignment: .leading) {
                                     Text("Courses Teaching")
                                         .font(.subheadline)
                                         .foregroundColor(.gray)
-                                    Text("\(String(describing: user?.teachingCourseNumber))")
+                                    Text("\(user.teachingCourseNumber)")
                                 }
                             }
                         }
-
+                        
                         Group {
                             Text("Tags and Specializations")
                                 .font(.headline)
-
+                            
                             ScrollView(.horizontal, showsIndicators: false) {
                                 HStack {
                                     TagView(tag: "Computer Science")
@@ -97,17 +112,17 @@ struct PersonalView: View {
                                 }
                             }
                         }
-
+                        
                         Group {
                             Text("Availability")
                                 .font(.headline)
-
+                            
                             HStack {
                                 VStack(alignment: .leading) {
                                     Text("Available Times")
                                         .font(.subheadline)
                                         .foregroundColor(.gray)
-                                    Text(user?.availability ?? "Monday to Friday 9 - 17")
+                                    Text(user.availability)
                                 }
                                 Spacer()
                             }
@@ -115,7 +130,7 @@ struct PersonalView: View {
                     }
                     .padding()
                 }
-
+                
                 Spacer()
             }
             .padding()
@@ -128,7 +143,7 @@ struct PersonalView: View {
 
 struct TagView: View {
     var tag: String
-
+    
     var body: some View {
         Text(tag)
             .font(.caption)
