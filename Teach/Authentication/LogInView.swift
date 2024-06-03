@@ -19,8 +19,7 @@ final class LogInModel: ObservableObject {
         }
         
         do {
-            let authDataResult = try await AuthenticationManager.shared.logInUser(email: email, password: password)
-
+            try await AuthenticationManager.shared.logInUser(email: email, password: password)
             print("Email: \(email) logged in successfully.")
             return true
         } catch {
