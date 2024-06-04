@@ -1,15 +1,8 @@
-//
-//  BaseClass.swift
-//  Teach
-//
-//  Created by Davie on 03/06/2024.
-//
-
 import Foundation
 import FirebaseFirestore
 import FirebaseFirestoreSwift
 
-class BaseClass: Codable {
+class BaseClass: Codable, Identifiable {
     var id: String
     var name: String
     var description: String
@@ -25,10 +18,8 @@ class BaseClass: Codable {
     }
 }
 
-class ClassManager {
-    
+final class ClassManager {
     static let shared = ClassManager()
-    
     private init() {}
     
     private let baseClassCollection = Firestore.firestore().collection("classes")
@@ -53,16 +44,17 @@ class ClassManager {
         try baseClassDocument(classId: baseClass.id).setData(from: baseClass, merge: false, encoder: encoder)
     }
     
-    func getBaseClass(classId: String) async throws -> BaseClass {
-        let documentSnapshot = try await baseClassDocument(classId: classId).getDocument()
-        return try documentSnapshot.data(as: BaseClass.self, decoder: decoder)
+    func fetchAllClasses() async throws -> [BaseClass] {
+        let snapshot = try await baseClassCollection.getDocuments()
+        return try snapshot.documents.map { try $0.data(as: BaseClass.self, decoder: decoder) }
     }
     
-    func updateBaseClass(baseClass: BaseClass) async throws {
-        try baseClassDocument(classId: baseClass.id).setData(from: baseClass, merge: true, encoder: encoder)
+    func deleteBaseClass(baseClass: BaseClass) async throws {
+        try await baseClassDocument(classId: baseClass.id).delete()
     }
     
-    
-    
-    
+    func getBaseClassOfUser(userId: String) async throws -> [BaseClass] {
+        let snapshot = try await baseClassCollection.whereField("teacher_id", isEqualTo: userId).getDocuments()
+        return try snapshot.documents.map { try $0.data(as: BaseClass.self, decoder: decoder) }
+    }
 }

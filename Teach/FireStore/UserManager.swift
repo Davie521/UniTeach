@@ -21,6 +21,7 @@ struct DatabaseUser: Codable {
     var teachingCourseNumber: Int
     var tags: [String]
     var availability: String
+    var baseClasses: [String] = []
     
     
     
@@ -37,9 +38,10 @@ struct DatabaseUser: Codable {
         self.tags = []
         self.availability = ""
         self.userName = "Student"
+        
     }
     
-    init(userId: String, userName: String, isTeacher: Bool, university: String, enrolledCourseNumber: Int, teachingCourseNumber: Int, tags: [String], availability: String) {
+    init(userId: String, userName: String, isTeacher: Bool, university: String, tags: [String], availability: String) {
         self.userId = userId
         self.email = "test1@test.com"
         self.photoUrl = nil
@@ -47,8 +49,8 @@ struct DatabaseUser: Codable {
         self.userName = userName
         self.isTeacher = isTeacher
         self.university = university
-        self.enrolledCourseNumber = enrolledCourseNumber
-        self.teachingCourseNumber = teachingCourseNumber
+        self.enrolledCourseNumber = 0
+        self.teachingCourseNumber = 0
         self.tags = tags
         self.availability = availability
     }
@@ -100,6 +102,12 @@ final class UserManager {
     func updateUser(user: DatabaseUser) async throws {
         try userDocument(userId: user.userId).setData(from: user, merge: true, encoder: encoder)
 
+    }
+    
+    func createBaseClass(userId: String, baseClass: BaseClass) async throws {
+        var user = try await getUser(userId: userId)
+        user.baseClasses.append(baseClass.id)
+        try await updateUser(user: user)
     }
     
  

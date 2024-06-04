@@ -1,15 +1,19 @@
+import FirebaseFirestore
+import FirebaseFirestoreSwift
 import SwiftUI
+import Combine
 
 final class PersonalViewModel: ObservableObject {
-    
-    var user: DatabaseUser
+    @Published var user: DatabaseUser
+    @Published var classes: [BaseClass] = []
     @Published var isLoading = false
     @Published var errorMessage: String?
     
-    init() {
-        user = DatabaseUser(userId: "", userName: "", isTeacher: false, university: "", enrolledCourseNumber: 0, teachingCourseNumber: 0, tags: [], availability: "")
-    }
+    private var db = Firestore.firestore()
     
+    init() {
+        user = DatabaseUser(userId: "", userName: "", isTeacher: false, university: "", tags: [], availability: "")
+    }
     
     func loadCurrentUser() async {
         DispatchQueue.main.async {
@@ -24,10 +28,25 @@ final class PersonalViewModel: ObservableObject {
                 self.user = fetchedUser
                 self.isLoading = false
             }
+            await fetchClasses(for: fetchedUser.userId)
+            
         } catch {
             DispatchQueue.main.async {
                 self.errorMessage = "Failed to load user data: \(error.localizedDescription)"
                 self.isLoading = false
+            }
+        }
+    }
+    
+    func fetchClasses(for userId: String) async {
+        do {
+            let fetchedClasses = try await ClassManager.shared.getBaseClassOfUser(userId: userId)
+            DispatchQueue.main.async {
+                self.classes = fetchedClasses
+            }
+        } catch {
+            DispatchQueue.main.async {
+                self.errorMessage = "Failed to load classes: \(error.localizedDescription)"
             }
         }
     }
@@ -113,17 +132,18 @@ struct PersonalView: View {
                         }
                         
                         Group {
-                            Text("Availability")
+                            Text("Classes")
                                 .font(.headline)
                             
-                            HStack {
-                                VStack(alignment: .leading) {
-                                    Text("Available Times")
-                                        .font(.subheadline)
+                            VStack(alignment: .leading, spacing: 10) {
+                                if viewModel.classes.isEmpty {
+                                    Text("No classes available.")
                                         .foregroundColor(.gray)
-                                    Text(user.availability)
+                                } else {
+                                    ForEach(viewModel.classes) { baseClass in
+                                        ClassCardView(baseClass: baseClass)
+                                    }
                                 }
-                                Spacer()
                             }
                         }
                     }
@@ -134,9 +154,38 @@ struct PersonalView: View {
             }
             .padding()
         }
+        .refreshable {
+            await viewModel.loadCurrentUser()
+        }
         .task {
             await viewModel.loadCurrentUser()
         }
+    }
+}
+
+struct ClassCardView: View {
+    var baseClass: BaseClass
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Text(baseClass.name)
+                    .font(.headline)
+                    .fontWeight(.bold)
+                Spacer()
+                Text("Price: ¥\(baseClass.price, specifier: "%.2f")")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+            }
+            
+            Text(baseClass.description)
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+        }
+        .padding()
+        .background(Color(.secondarySystemBackground))
+        .cornerRadius(10)
+        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 5)
     }
 }
 
@@ -153,7 +202,7 @@ struct TagView: View {
     }
 }
 
-struct CombinedProfileView_Previews: PreviewProvider {
+struct PersonalView_Previews: PreviewProvider {
     static var previews: some View {
         NavigationStack {
             PersonalView()

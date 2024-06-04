@@ -2,7 +2,7 @@ import SwiftUI
 
 @MainActor
 class SettingsModel: ObservableObject {
-    @Published var user: DatabaseUser?
+    var user: DatabaseUser?
     @Published var isLoading = false
     @Published var errorMessage: String?
 
@@ -29,30 +29,71 @@ class SettingsModel: ObservableObject {
     }
 }
 
+
+class ClassViewModel: ObservableObject {
+    @Published var classes: [BaseClass] = []
+    @Published var isLoading = false
+    @Published var errorMessage: String?
+
+    func fetchClasses() async {
+        isLoading = true
+        errorMessage = nil
+        do {
+            let fetchedClasses = try await ClassManager.shared.fetchAllClasses()
+            classes = fetchedClasses
+            isLoading = false
+        } catch {
+            errorMessage = "Failed to fetch classes: \(error.localizedDescription)"
+            isLoading = false
+        }
+    }
+
+    func addClass(_ baseClass: BaseClass) async {
+        do {
+            try await ClassManager.shared.createBaseClass(baseClass: baseClass)
+            await fetchClasses() // Refresh the class list
+        } catch {
+            errorMessage = "Failed to add class: \(error.localizedDescription)"
+        }
+    }
+
+    func removeClass(_ baseClass: BaseClass) async {
+        do {
+            try await ClassManager.shared.deleteBaseClass(baseClass: baseClass)
+            await fetchClasses() // Refresh the class list
+        } catch {
+            errorMessage = "Failed to remove class: \(error.localizedDescription)"
+        }
+    }
+}
+
 import SwiftUI
 
 struct SettingView: View {
     @Environment(\.dismiss) private var dismiss
     @Binding var showLogInView: Bool
-    @StateObject private var model = SettingsModel()
+    @StateObject private var settingsModel = SettingsModel()
+    @StateObject private var classViewModel = ClassViewModel()
     @State private var newTag: String = ""
-    
+    @State private var newClass = BaseClass(id: UUID().uuidString, name: "", description: "", teacherId: "", price: 0.0)
+    @State private var isEditingClass = false
+
     var body: some View {
         NavigationStack {
             VStack(spacing: 20) {
-                if let user = model.user {
+                if let user = settingsModel.user {
                     VStack(spacing: 15) {
                         profileSection(user: user)
-                        tagsSection(user: user)
+                        classesSection()
                         saveButton
                     }
                     .padding()
                     .background(Color(.systemBackground).opacity(0.9))
                     .cornerRadius(15)
                     .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 10)
-                } else if model.isLoading {
+                } else if settingsModel.isLoading {
                     ProgressView()
-                } else if let errorMessage = model.errorMessage {
+                } else if let errorMessage = settingsModel.errorMessage {
                     Text(errorMessage)
                         .foregroundColor(.red)
                 }
@@ -62,7 +103,16 @@ struct SettingView: View {
             .padding()
             .navigationTitle("Settings")
             .task {
-                await model.loadCurrentUser()
+                await settingsModel.loadCurrentUser()
+                await classViewModel.fetchClasses()
+            }
+            .sheet(isPresented: $isEditingClass) {
+                EditClassView(baseClass: $newClass)
+                    .onDisappear {
+                        Task {
+                            await classViewModel.fetchClasses()
+                        }
+                    }
             }
         }
     }
@@ -78,7 +128,7 @@ struct SettingView: View {
             TextField("Username", text: Binding(
                 get: { user.userName },
                 set: { newValue in
-                    model.user?.userName = newValue
+                    settingsModel.user?.userName = newValue
                 }
             ))
             .textFieldStyle(PlainTextFieldStyle())
@@ -89,7 +139,7 @@ struct SettingView: View {
             TextField("University", text: Binding(
                 get: { user.university },
                 set: { newValue in
-                    model.user?.university = newValue
+                    settingsModel.user?.university = newValue
                 }
             ))
             .textFieldStyle(PlainTextFieldStyle())
@@ -103,52 +153,54 @@ struct SettingView: View {
                 .padding()
                 .background(Color(.secondarySystemBackground))
                 .cornerRadius(10)
-            
-            Toggle("Teacher", isOn: .constant(user.isTeacher))
-                .disabled(true)
         }
     }
 
     @ViewBuilder
-    private func tagsSection(user: DatabaseUser) -> some View {
+    private func classesSection() -> some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Tags")
+            Text("Classes")
                 .font(.title2)
                 .fontWeight(.bold)
                 .foregroundColor(.primary)
             
-            HStack {
-                TextField("New Tag", text: $newTag)
-                    .textFieldStyle(PlainTextFieldStyle())
+            Button(action: {
+                newClass = BaseClass(id: UUID().uuidString, name: "", description: "", teacherId: settingsModel.user?.userId ?? "", price: 0.0)
+                isEditingClass = true
+            }) {
+                HStack {
+                    Image(systemName: "plus")
+                    Text("Add New Class")
+                }
+            }
+            .padding()
+
+            if classViewModel.classes.isEmpty {
+                Text("No classes available.")
+                    .foregroundColor(.gray)
+                    .padding()
+            } else {
+                ForEach(classViewModel.classes) { baseClass in
+                    HStack {
+                        VStack(alignment: .leading) {
+                            Text(baseClass.name)
+                                .font(.headline)
+                            Text(baseClass.description)
+                                .font(.subheadline)
+                        }
+                        Spacer()
+                        Button(action: {
+                            newClass = baseClass
+                            isEditingClass = true
+                        }) {
+                            Image(systemName: "pencil")
+                                .foregroundColor(.blue)
+                        }
+                    }
                     .padding()
                     .background(Color(.secondarySystemBackground))
                     .cornerRadius(10)
-                
-                Button(action: {
-                    guard !newTag.isEmpty else { return }
-                    model.user?.tags.append(newTag)
-                    newTag = ""
-                }) {
-                    Image(systemName: "plus")
-                        .foregroundColor(.blue)
                 }
-                .padding(.horizontal, 10)
-            }
-            
-            ForEach(user.tags, id: \.self) { tag in
-                HStack {
-                    Text(tag)
-                    Spacer()
-                    Button(action: {
-                        model.user?.tags.removeAll { $0 == tag }
-                    }) {
-                        Image(systemName: "minus.circle.fill")
-                            .foregroundColor(.red)
-                    }
-                }
-                .padding()
-                .background(Color(.secondarySystemBackground))
-                .cornerRadius(10)
             }
         }
     }
@@ -157,7 +209,7 @@ struct SettingView: View {
         Button(action: {
             Task {
                 do {
-                    try await model.updateUser()
+                    try await settingsModel.updateUser()
                     dismiss()
                 } catch {
                     print("Failed to update user: \(error.localizedDescription)")
@@ -181,7 +233,7 @@ struct SettingView: View {
         Button(action: {
             Task {
                 do {
-                    try model.logOut()
+                    try settingsModel.logOut()
                     showLogInView = true
                     dismiss()
                 } catch {
