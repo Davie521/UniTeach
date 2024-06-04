@@ -2,7 +2,7 @@ import SwiftUI
 
 @MainActor
 class SettingsModel: ObservableObject {
-    var user: DatabaseUser?
+    @Published var user: DatabaseUser?
     @Published var isLoading = false
     @Published var errorMessage: String?
 
@@ -67,7 +67,6 @@ class ClassViewModel: ObservableObject {
     }
 }
 
-import SwiftUI
 
 struct SettingView: View {
     @Environment(\.dismiss) private var dismiss
@@ -165,7 +164,7 @@ struct SettingView: View {
                 .foregroundColor(.primary)
             
             Button(action: {
-                newClass = BaseClass(id: UUID().uuidString, name: "", description: "", teacherId: settingsModel.user?.userId ?? "", price: 0.0)
+                newClass = BaseClass(id: UUID().uuidString, name: "", description: "", teacherId: settingsModel.user?.id ?? "", price: 0.0)
                 isEditingClass = true
             }) {
                 HStack {

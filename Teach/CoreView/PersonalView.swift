@@ -28,7 +28,7 @@ final class PersonalViewModel: ObservableObject {
                 self.user = fetchedUser
                 self.isLoading = false
             }
-            await fetchClasses(for: fetchedUser.userId)
+            await fetchClasses(for: fetchedUser.id)
             
         } catch {
             DispatchQueue.main.async {

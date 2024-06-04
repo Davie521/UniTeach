@@ -1,26 +1,44 @@
 import SwiftUI
 
 struct SearchView: View {
+    @State private var searchText = ""
+
     var body: some View {
         VStack {
-            HeaderView()
+            HeaderView(searchText: $searchText)
             ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
-                    StudentRecommendationsView()
-                    CommunityView()
+                if searchText.isEmpty {
+                    VStack(alignment: .leading, spacing: 16) {
+                        StudentRecommendationsView(searchText: searchText)
+                        CommunityView(searchText: searchText)
+                    }
+                    .padding()
+                } else {
+                    VStack(alignment: .leading, spacing: 16) {
+                        ForEach(filteredStudents()) { student in
+                            StudentCardView(student: student)
+                        }
+                    }
+                    .padding()
                 }
-                .padding()
             }
         }
         .background(Color(.systemBackground).ignoresSafeArea())
     }
+
+    private func filteredStudents() -> [DatabaseUser] {
+        return users.filter { $0.userName.lowercased().contains(searchText.lowercased()) }
+    }
 }
 
+
 struct HeaderView: View {
+    @Binding var searchText: String
+
     var body: some View {
         VStack {
             HStack {
-                SearchBar()
+                SearchBar(searchText: $searchText)
             }
             .padding()
             .background(Color(.systemBackground))
@@ -30,7 +48,7 @@ struct HeaderView: View {
 }
 
 struct SearchBar: View {
-    @State private var searchText = ""
+    @Binding var searchText: String
 
     var body: some View {
         HStack {
@@ -56,6 +74,8 @@ struct AvatarView: View {
 }
 
 struct StudentRecommendationsView: View {
+    var searchText: String
+
     var body: some View {
         VStack(alignment: .leading) {
             HStack {
@@ -63,39 +83,79 @@ struct StudentRecommendationsView: View {
                     .font(.title2)
                     .bold()
                 Spacer()
-                
             }
             .padding(.bottom, 8)
 
             LazyVStack(spacing: 16) {
-                ForEach(students) { student in
+                ForEach(filteredStudents()) { student in
                     StudentCardView(student: student)
                 }
             }
         }
     }
+
+    private func filteredStudents() -> [DatabaseUser] {
+        if searchText.isEmpty {
+            return users
+        } else {
+            return users.filter { $0.userName.lowercased().contains(searchText.lowercased()) }
+        }
+    }
 }
 
+struct CommunityView: View {
+    var searchText: String
+
+    var body: some View {
+        VStack(alignment: .leading) {
+            Text("Community")
+                .font(.title2)
+                .bold()
+                .padding(.bottom, 8)
+
+            LazyVStack(spacing: 16) {
+                ForEach(filteredCommunities()) { community in
+                    CommunityCardView(community: community)
+                }
+            }
+        }
+    }
+
+    private func filteredCommunities() -> [Community] {
+        if searchText.isEmpty {
+            return communities
+        } else {
+            return communities.filter { $0.name.lowercased().contains(searchText.lowercased()) }
+        }
+    }
+}
 struct StudentCardView: View {
-    let student: Student
+    let student: DatabaseUser
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
                 AvatarView()
                 VStack(alignment: .leading) {
-                    Text(student.name)
+                    Text(student.userName)
                         .font(.headline)
                     Text(student.university)
                         .font(.subheadline)
                         .foregroundColor(.gray)
                 }
             }
-            Text(student.description)
-                .font(.body)
-                .lineLimit(2)
-                .foregroundColor(.gray)
-                .fixedSize(horizontal: false, vertical: true)
+            ScrollView(.horizontal, showsIndicators: false) {
+                HStack {
+                    ForEach(student.tags, id: \.self) { tag in
+                        Text(tag)
+                            .padding(.horizontal, 8)
+                            .padding(.vertical, 4)
+                            .background(Color.blue)
+                            .foregroundColor(.white)
+                            .cornerRadius(10)
+                    }
+                }
+            }
         }
         .padding()
         .frame(maxWidth: .infinity) // Ensure the card takes the full width available
@@ -105,22 +165,7 @@ struct StudentCardView: View {
     }
 }
 
-struct CommunityView: View {
-    var body: some View {
-        VStack(alignment: .leading) {
-            Text("Community")
-                .font(.title2)
-                .bold()
-                .padding(.bottom, 8)
 
-            LazyVStack(spacing: 16) {
-                ForEach(communities) { community in
-                    CommunityCardView(community: community)
-                }
-            }
-        }
-    }
-}
 
 struct CommunityCardView: View {
     let community: Community
@@ -156,12 +201,6 @@ struct CircleAvatarView: View {
     }
 }
 
-struct Student: Identifiable {
-    let id = UUID()
-    let name: String
-    let university: String
-    let description: String
-}
 
 struct Community: Identifiable {
     let id = UUID()
@@ -176,12 +215,10 @@ struct Activity: Identifiable {
     let description: String
 }
 
-let students = [
-    Student(name: "John Doe", university: "Harvard University", description: "John Doe is a highly talented student with a passion for math and physics."),
-    Student(name: "Jane Smith", university: "Stanford University", description: "Jane Smith is a passionate student of English and Literature with a unique perspective."),
-//    Student(name: "Michael Johnson", university: "MIT", description: "Michael Johnson is a highly knowledgeable and engaged student of History and Geography."),
-//    Student(name: "Emily Davis", university: "UC Berkeley", description: "Emily Davis is a highly talented and passionate student of Biology and Chemistry."),
-    // Add more students as needed
+let users = [
+    DatabaseUser(userId: "1", userName: "Alice", isTeacher: false, university: "University of California, Berkeley",  tags: ["A* on math, A* on physics"], availability: "Weekends"),
+    DatabaseUser(userId: "2", userName: "Bob", isTeacher: false, university: "University of California, Berkeley", tags: ["A* on math, A* on physics"], availability: "Weekends"),
+    DatabaseUser(userId: "3", userName: "Charlie", isTeacher: false, university: "University of California, Berkeley", tags: ["A* on math, A* on physics"], availability: "Weekends"),
 ]
 
 let communities = [

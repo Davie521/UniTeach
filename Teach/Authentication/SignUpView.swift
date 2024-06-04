@@ -46,7 +46,8 @@ final class SignUpEmailModel: ObservableObject {
             return emailPred.evaluate(with: email)
         }
         
-        try await AuthenticationManager.shared.createUser(email: email, password: password)
+        let user = try await AuthenticationManager.shared.createUser(email: email, password: password)
+        try await UserManager.shared.createNewUser(user: DatabaseUser(auth: user))
         // print email
         print("Email: \(email) signed up successfully.")
         

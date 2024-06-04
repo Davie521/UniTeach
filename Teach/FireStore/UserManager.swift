@@ -9,8 +9,8 @@ import Foundation
 import FirebaseFirestore
 import FirebaseFirestoreSwift
 
-struct DatabaseUser: Codable {
-    let userId: String
+struct DatabaseUser: Codable, Identifiable {
+    var id: String
     let email: String
     var photoUrl: String?
     let dateCreated: Date
@@ -27,7 +27,7 @@ struct DatabaseUser: Codable {
     
     
     init(auth: AuthDataResultModel) {
-        self.userId = auth.uid
+        self.id = auth.uid
         self.email = auth.email
         self.photoUrl = auth.photoUrl
         self.dateCreated = Date()
@@ -42,7 +42,7 @@ struct DatabaseUser: Codable {
     }
     
     init(userId: String, userName: String, isTeacher: Bool, university: String, tags: [String], availability: String) {
-        self.userId = userId
+        self.id = userId
         self.email = "test1@test.com"
         self.photoUrl = nil
         self.dateCreated = Date()
@@ -86,7 +86,7 @@ final class UserManager {
     }()
     
     func createNewUser(user: DatabaseUser) async throws {
-        try userDocument(userId: user.userId).setData(from: user, merge: false, encoder: encoder)
+        try userDocument(userId: user.id).setData(from: user, merge: false, encoder: encoder)
     }
 
     func getUser(userId: String) async throws -> DatabaseUser {
@@ -100,7 +100,7 @@ final class UserManager {
         try await userDocument(userId: userId).updateData(data)
     }
     func updateUser(user: DatabaseUser) async throws {
-        try userDocument(userId: user.userId).setData(from: user, merge: true, encoder: encoder)
+        try userDocument(userId: user.id).setData(from: user, merge: true, encoder: encoder)
 
     }
     
@@ -108,6 +108,11 @@ final class UserManager {
         var user = try await getUser(userId: userId)
         user.baseClasses.append(baseClass.id)
         try await updateUser(user: user)
+    }
+    
+    func searchUserByName(name: String) async throws -> [DatabaseUser] {
+        let snapshot = try await userCollection.whereField("user_name", isEqualTo: name).getDocuments()
+        return try snapshot.documents.map { try $0.data(as: DatabaseUser.self, decoder: decoder) }
     }
     
  
