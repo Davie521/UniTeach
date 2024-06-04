@@ -1,22 +1,71 @@
 import SwiftUI
+import Combine
+
+@MainActor
+class SearchViewModel: ObservableObject {
+    @Published var users: [DatabaseUser] = []
+    @Published var searchText: String = ""
+    
+    private var userManager = UserManager.shared
+    private var cancellables = Set<AnyCancellable>()
+    
+    init() {
+        $searchText
+            .debounce(for: 0.5, scheduler: RunLoop.main)
+            .removeDuplicates()
+            .sink { [weak self] searchText in
+                if searchText.isEmpty {
+                    self?.users = []
+                } else {
+                    Task {
+                        await self?.searchUsers()
+                    }
+                }
+            }
+            .store(in: &cancellables)
+    }
+    
+    func searchUsers() async {
+        guard !searchText.isEmpty else { return }
+        do {
+            users = try await userManager.searchUsersByName(name: searchText)
+        } catch {
+            print("Error searching users: \(error)")
+            users = []
+        }
+    }
+    
+    func cancelSearch() {
+        searchText = ""
+        users = []
+    }
+}
 
 struct SearchView: View {
-    @State private var searchText = ""
-
+    @StateObject private var viewModel = SearchViewModel()
+    
     var body: some View {
         VStack {
-            HeaderView(searchText: $searchText)
+            // Using HeaderView which internally uses the updated SearchBar
+            HeaderView(searchText: $viewModel.searchText, onSearch: {
+                Task {
+                    await viewModel.searchUsers()
+                }
+            }, onCancel: {
+                viewModel.cancelSearch()
+            })
+            
             ScrollView {
-                if searchText.isEmpty {
+                if viewModel.searchText.isEmpty {
                     VStack(alignment: .leading, spacing: 16) {
-                        StudentRecommendationsView(searchText: searchText)
-                        CommunityView(searchText: searchText)
+                        StudentRecommendationsView(searchText: viewModel.searchText)
+                        CommunityView(searchText: viewModel.searchText)
                     }
                     .padding()
                 } else {
                     VStack(alignment: .leading, spacing: 16) {
-                        ForEach(filteredStudents()) { student in
-                            StudentCardView(student: student)
+                        ForEach(viewModel.users, id: \.id) { user in
+                            StudentCardView(student: user)
                         }
                     }
                     .padding()
@@ -25,43 +74,60 @@ struct SearchView: View {
         }
         .background(Color(.systemBackground).ignoresSafeArea())
     }
-
-    private func filteredStudents() -> [DatabaseUser] {
-        return users.filter { $0.userName.lowercased().contains(searchText.lowercased()) }
-    }
 }
+
 
 
 struct HeaderView: View {
     @Binding var searchText: String
-
+    var onSearch: () -> Void
+    var onCancel: () -> Void
+    
     var body: some View {
         VStack {
             HStack {
-                SearchBar(searchText: $searchText)
+                SearchBar(searchText: $searchText, onSearch: onSearch, onCancel: onCancel)
             }
             .padding()
             .background(Color(.systemBackground))
+            .cornerRadius(10)
             .shadow(radius: 0.1)
         }
     }
 }
 
+
 struct SearchBar: View {
     @Binding var searchText: String
-
+    var onSearch: () -> Void
+    var onCancel: () -> Void
+    
     var body: some View {
         HStack {
-            Image(systemName: "magnifyingglass")
-                .foregroundColor(.gray)
             TextField("Search for courses, teachers, and more...", text: $searchText)
                 .padding(8)
                 .background(Color(.systemGray6))
                 .cornerRadius(8)
+                .onSubmit(onSearch)
+                .submitLabel(.search)
+            
+            // Conditional button that changes based on whether the user has begun typing
+            Button(searchText.isEmpty ? "Search" : "Cancel") {
+                if searchText.isEmpty {
+                    onSearch()
+                } else {
+                    onCancel()
+                }
+            }
+            .transition(.scale)
         }
         .padding(.horizontal)
     }
 }
+
+
+
+
 
 struct AvatarView: View {
     var body: some View {
@@ -75,63 +141,46 @@ struct AvatarView: View {
 
 struct StudentRecommendationsView: View {
     var searchText: String
-
+    
     var body: some View {
         VStack(alignment: .leading) {
-            HStack {
-                Text("My Recommendations")
-                    .font(.title2)
-                    .bold()
-                Spacer()
-            }
-            .padding(.bottom, 8)
-
+            Text("My Recommendations")
+                .font(.title2)
+                .bold()
             LazyVStack(spacing: 16) {
-                ForEach(filteredStudents()) { student in
-                    StudentCardView(student: student)
+                // Sample static data for demonstration
+                ForEach(sampleUsers) { user in
+                    StudentCardView(student: user)
                 }
             }
         }
-    }
-
-    private func filteredStudents() -> [DatabaseUser] {
-        if searchText.isEmpty {
-            return users
-        } else {
-            return users.filter { $0.userName.lowercased().contains(searchText.lowercased()) }
-        }
+        .padding(.bottom, 8)
     }
 }
 
+
 struct CommunityView: View {
     var searchText: String
-
+    
     var body: some View {
         VStack(alignment: .leading) {
             Text("Community")
                 .font(.title2)
                 .bold()
-                .padding(.bottom, 8)
-
             LazyVStack(spacing: 16) {
-                ForEach(filteredCommunities()) { community in
+                // Assuming communities is an array of Community objects
+                ForEach(communities) { community in
                     CommunityCardView(community: community)
                 }
             }
         }
-    }
-
-    private func filteredCommunities() -> [Community] {
-        if searchText.isEmpty {
-            return communities
-        } else {
-            return communities.filter { $0.name.lowercased().contains(searchText.lowercased()) }
-        }
+        .padding(.bottom, 8)
     }
 }
+
 struct StudentCardView: View {
     let student: DatabaseUser
-
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
@@ -169,7 +218,7 @@ struct StudentCardView: View {
 
 struct CommunityCardView: View {
     let community: Community
-
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(community.name)
@@ -189,7 +238,7 @@ struct CommunityCardView: View {
 
 struct CircleAvatarView: View {
     let activity: Activity
-
+    
     var body: some View {
         VStack {
             AvatarView()
@@ -215,7 +264,7 @@ struct Activity: Identifiable {
     let description: String
 }
 
-let users = [
+let sampleUsers = [
     DatabaseUser(userId: "1", userName: "Alice", isTeacher: false, university: "University of California, Berkeley",  tags: ["A* on math, A* on physics"], availability: "Weekends"),
     DatabaseUser(userId: "2", userName: "Bob", isTeacher: false, university: "University of California, Berkeley", tags: ["A* on math, A* on physics"], availability: "Weekends"),
     DatabaseUser(userId: "3", userName: "Charlie", isTeacher: false, university: "University of California, Berkeley", tags: ["A* on math, A* on physics"], availability: "Weekends"),
@@ -223,7 +272,7 @@ let users = [
 
 let communities = [
     Community(name: "Math Community", description: "Discuss math concepts, share solutions, and connect with other math enthusiasts.", activities: []),
-//    Community(name: "Physics Community", description: "Discuss physics concepts, share experiments, and connect with other physics enthusiasts.", activities: []),
+    //    Community(name: "Physics Community", description: "Discuss physics concepts, share experiments, and connect with other physics enthusiasts.", activities: []),
     Community(name: "English Community", description: "Discuss literature, writing techniques, and connect with other English enthusiasts.", activities: []),
     // Add more communities as needed
 ]
@@ -232,7 +281,7 @@ struct SearchView_Previews: PreviewProvider {
     static var previews: some View {
         SearchView()
             .preferredColorScheme(.light)
-//        SearchView()
-//            .preferredColorScheme(.dark)
+        //        SearchView()
+        //            .preferredColorScheme(.dark)
     }
 }

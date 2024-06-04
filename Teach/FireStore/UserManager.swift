@@ -110,11 +110,14 @@ final class UserManager {
         try await updateUser(user: user)
     }
     
-    func searchUserByName(name: String) async throws -> [DatabaseUser] {
-        let snapshot = try await userCollection.whereField("user_name", isEqualTo: name).getDocuments()
-        return try snapshot.documents.map { try $0.data(as: DatabaseUser.self, decoder: decoder) }
+    func searchUsersByName(name: String) async throws -> [DatabaseUser] {
+        let snapshot = try await userCollection
+            .whereField("user_name", isGreaterThanOrEqualTo: name)
+            .whereField("user_name", isLessThanOrEqualTo: name + "\u{f8ff}")
+            .getDocuments()
+        return try snapshot.documents.compactMap { try $0.data(as: DatabaseUser.self, decoder: decoder) }
     }
-    
+
  
 
 
