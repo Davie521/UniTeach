@@ -11,7 +11,7 @@
 		DD2D16BC2C0674AD00C31F60 /* SearchView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD2D16BB2C0674AD00C31F60 /* SearchView.swift */; };
 		DD2D16BE2C067B9E00C31F60 /* DesktopView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD2D16BD2C067B9E00C31F60 /* DesktopView.swift */; };
 		DD359B112C04CBDE007E28BA /* UserManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD359B102C04CBDE007E28BA /* UserManager.swift */; };
-		DD498F372C111F210094263A /* LiveClassManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD498F362C111F210094263A /* LiveClassManager.swift */; };
+		DD498F392C1132190094263A /* LiveClassManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD498F382C1132190094263A /* LiveClassManager.swift */; };
 		DD6622882C08C60000B5ABBA /* AuthenticationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD6622872C08C60000B5ABBA /* AuthenticationManager.swift */; };
 		DD761A732C04B9CF00F024AA /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = DD761A722C04B9CF00F024AA /* FirebaseFirestore */; };
 		DD761A752C04B9CF00F024AA /* FirebaseFirestoreSwift in Frameworks */ = {isa = PBXBuildFile; productRef = DD761A742C04B9CF00F024AA /* FirebaseFirestoreSwift */; };
@@ -38,7 +38,7 @@
 		DD2D16BB2C0674AD00C31F60 /* SearchView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchView.swift; sourceTree = "<group>"; };
 		DD2D16BD2C067B9E00C31F60 /* DesktopView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesktopView.swift; sourceTree = "<group>"; };
 		DD359B102C04CBDE007E28BA /* UserManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserManager.swift; sourceTree = "<group>"; };
-		DD498F362C111F210094263A /* LiveClassManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = LiveClassManager.swift; path = ../../../../Documents/LiveClassManager.swift; sourceTree = "<group>"; };
+		DD498F382C1132190094263A /* LiveClassManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveClassManager.swift; sourceTree = "<group>"; };
 		DD6622872C08C60000B5ABBA /* AuthenticationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationManager.swift; sourceTree = "<group>"; };
 		DD7973902C0E24570070FE42 /* ClassManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClassManager.swift; sourceTree = "<group>"; };
 		DD7973922C0E2A5B0070FE42 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
@@ -77,7 +77,7 @@
 			children = (
 				DD359B102C04CBDE007E28BA /* UserManager.swift */,
 				DD7973902C0E24570070FE42 /* ClassManager.swift */,
-				DD498F362C111F210094263A /* LiveClassManager.swift */,
+				DD498F382C1132190094263A /* LiveClassManager.swift */,
 			);
 			path = FireStore;
 			sourceTree = "<group>";
@@ -237,7 +237,7 @@
 			files = (
 				DD359B112C04CBDE007E28BA /* UserManager.swift in Sources */,
 				DD7973952C0F28230070FE42 /* ProfileView.swift in Sources */,
-				DD498F372C111F210094263A /* LiveClassManager.swift in Sources */,
+				DD498F392C1132190094263A /* LiveClassManager.swift in Sources */,
 				DD2D16B82C06440200C31F60 /* PersonalView.swift in Sources */,
 				DDC1966B2C03840200403717 /* SettingView.swift in Sources */,
 				DD2D16BC2C0674AD00C31F60 /* SearchView.swift in Sources */,
