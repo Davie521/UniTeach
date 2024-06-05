@@ -68,7 +68,7 @@ struct SettingView: View {
     @Environment(\.dismiss) private var dismiss
     @Binding var showLogInView: Bool
     @ObservedObject var settingsModel: SettingsModel
-    @State private var newClass = BaseClass(id: UUID().uuidString, name: "", description: "", teacherId: "", price: 0.0)
+    @State private var newClass = BaseClass(id: UUID().uuidString, name: "", description: "", teacherId: "", price: 0.0, rating: 0.0, reviews: [])
     @State private var isEditingClass = false
 
     var body: some View {
@@ -154,7 +154,7 @@ struct SettingView: View {
                 .foregroundColor(.primary)
             
             Button(action: {
-                newClass = BaseClass(id: UUID().uuidString, name: "", description: "", teacherId: settingsModel.user?.id ?? "", price: 0.0)
+                newClass = BaseClass(id: UUID().uuidString, name: "", description: "", teacherId: settingsModel.user?.id ?? "", price: 0.0, rating: 0.0, reviews: [])
                 isEditingClass = true
             }) {
                 HStack {

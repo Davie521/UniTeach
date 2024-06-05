@@ -61,6 +61,6 @@ struct EditClassView: View {
 
 struct EditClassView_Previews: PreviewProvider {
     static var previews: some View {
-        EditClassView(baseClass: .constant(BaseClass(id: "1", name: "Math", description: "Mathematics", teacherId: "1", price: 100.0)), settingsModel: SettingsModel())
+        EditClassView(baseClass: .constant(BaseClass(id: "1", name: "Math", description: "Mathematics", teacherId: "1", price: 100.0, rating: 4.5, reviews: [])), settingsModel: SettingsModel())
     }
 }

@@ -5,6 +5,7 @@ import Combine
 class SearchViewModel: ObservableObject {
     @Published var users: [DatabaseUser] = []
     @Published var searchText: String = ""
+
     
     private var userManager = UserManager.shared
     private var cancellables = Set<AnyCancellable>()
@@ -40,6 +41,20 @@ class SearchViewModel: ObservableObject {
         users = []
     }
 }
+
+@MainActor
+class RecommendationsViewModel: ObservableObject {
+    @Published var recommendedUsers: [DatabaseUser] = []
+
+    func fetchRecommendedUsers() async {
+        do {
+            recommendedUsers = try await UserManager.shared.getRecommandedUsers()
+        } catch {
+            print("Error fetching recommended users: \(error)")
+        }
+    }
+}
+
 
 struct SearchView: View {
     @StateObject private var viewModel = SearchViewModel()
@@ -127,10 +142,6 @@ struct SearchBar: View {
         .padding(.horizontal)  // Control padding to affect overall size and placement
     }
 }
-//
-
-
-
 
 
 struct AvatarView: View {
@@ -144,6 +155,7 @@ struct AvatarView: View {
 }
 
 struct StudentRecommendationsView: View {
+    @StateObject private var model = RecommendationsViewModel()
     var searchText: String
     
     var body: some View {
@@ -152,15 +164,20 @@ struct StudentRecommendationsView: View {
                 .font(.title2)
                 .bold()
             LazyVStack(spacing: 16) {
-                // Sample static data for demonstration
-                ForEach(sampleUsers) { user in
+                ForEach(model.recommendedUsers) { user in
                     StudentCardView(student: user)
                 }
             }
         }
         .padding(.bottom, 8)
+        .onAppear {
+            Task {
+                await model.fetchRecommendedUsers()
+            }
+        }
     }
 }
+
 
 
 struct CommunityView: View {
@@ -256,11 +273,7 @@ struct Activity: Identifiable {
     let description: String
 }
 
-let sampleUsers = [
-    DatabaseUser(userId: "1", userName: "Alice", isTeacher: false, university: "University of California, Berkeley",  tags: ["A* on math, A* on physics"], availability: "Weekends"),
-    DatabaseUser(userId: "2", userName: "Bob", isTeacher: false, university: "University of California, Berkeley", tags: ["A* on math, A* on physics"], availability: "Weekends"),
-    DatabaseUser(userId: "3", userName: "Charlie", isTeacher: false, university: "University of California, Berkeley", tags: ["A* on math, A* on physics"], availability: "Weekends"),
-]
+
 
 let communities = [
     Community(name: "Math Community", description: "Discuss math concepts, share solutions, and connect with other math enthusiasts.", activities: []),

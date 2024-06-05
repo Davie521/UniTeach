@@ -117,6 +117,14 @@ final class UserManager {
             .getDocuments()
         return try snapshot.documents.compactMap { try $0.data(as: DatabaseUser.self, decoder: decoder) }
     }
+    
+    // get two random user in the database
+    func getRecommandedUsers() async throws -> [DatabaseUser] {
+        let snapshot = try await userCollection
+            .limit(to: 2)
+            .getDocuments()
+        return try snapshot.documents.compactMap { try $0.data(as: DatabaseUser.self, decoder: decoder) }
+    }
 
  
 

@@ -8,13 +8,17 @@ class BaseClass: Codable, Identifiable {
     var description: String
     var teacherId: String
     var price: Double
+    var rating: Double = 0.0
+    var reviews: [String] = []
     
-    init(id: String, name: String, description: String, teacherId: String, price: Double) {
+    init(id: String, name: String, description: String, teacherId: String, price: Double, rating: Double, reviews: [String]) {
         self.id = id
         self.name = name
         self.description = description
         self.teacherId = teacherId
         self.price = price
+        self.rating = rating
+        self.reviews = reviews
     }
 }
 

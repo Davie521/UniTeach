@@ -91,41 +91,18 @@ struct ProfileView: View {
                                 Spacer()
                             }
                         }
-                        
-                        Group {
-                            Text("Courses Information")
-                                .font(.headline)
-                            
-                            HStack {
-                                VStack(alignment: .leading) {
-                                    Text("Courses Enrolled")
-                                        .font(.subheadline)
-                                        .foregroundColor(.gray)
-                                    Text("\(user.enrolledCourseNumber)")
-                                    
-                                }
-                                Spacer()
-                                VStack(alignment: .leading) {
-                                    Text("Courses Teaching")
-                                        .font(.subheadline)
-                                        .foregroundColor(.gray)
-                                    Text("\(user.teachingCourseNumber)")
-                                }
-                            }
-                        }
-                        
-                        Group {
-                            Text("Tags and Specializations")
-                                .font(.headline)
-                            
-                            ScrollView(.horizontal, showsIndicators: false) {
-                                HStack {
-                                    ForEach(user.tags, id: \.self) { tag in
-                                        TagView(tag: tag)
-                                    }
-                                }
-                            }
-                        }
+//                        Group {
+//                            Text("Tags and Specializations")
+//                                .font(.headline)
+//                            
+//                            ScrollView(.horizontal, showsIndicators: false) {
+//                                HStack {
+//                                    ForEach(user.tags, id: \.self) { tag in
+//                                        TagView(tag: tag)
+//                                    }
+//                                }
+//                            }
+//                        }
                         
                         Group {
                             Text("Classes")
@@ -137,7 +114,7 @@ struct ProfileView: View {
                                         .foregroundColor(.gray)
                                 } else {
                                     ForEach(viewModel.classes) { baseClass in
-                                        ClassCardView(baseClass: baseClass)
+                                        ProfileClassCardView(baseClass: baseClass)
                                     }
                                 }
                             }
@@ -157,6 +134,56 @@ struct ProfileView: View {
         }
     }
 }
+
+struct ProfileClassCardView: View {
+    var baseClass: BaseClass
+
+    var body: some View {
+        NavigationLink(destination: ClassDetailView(baseClass: baseClass)) {
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Text(baseClass.name)
+                        .font(.headline)
+                        .fontWeight(.bold)
+                    Spacer()
+                    Text("Price: ¥\(baseClass.price, specifier: "%.2f")")
+                        .font(.subheadline)
+                        .foregroundColor(.secondary)
+                }
+                
+                Text(baseClass.description)
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+                
+                HStack {
+                    Spacer()
+                    RatingView(rating: baseClass.rating)
+                }
+            }
+            .padding()
+            .background(Color(.secondarySystemBackground))
+            .cornerRadius(10)
+            .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 5)
+        }
+        .buttonStyle(PlainButtonStyle())
+    }
+}
+
+
+struct RatingView: View {
+    var rating: Double
+    
+    var body: some View {
+        HStack(spacing: 2) {
+            ForEach(0..<5) { index in
+                Image(systemName: index < Int(rating) ? "star.fill" : "star")
+                    .foregroundColor(index < Int(rating) ? Color.yellow : Color.gray)
+            }
+        }
+        .font(.caption)
+    }
+}
+
 
 struct ProfileView_Previews: PreviewProvider {
     static var previews: some View {
