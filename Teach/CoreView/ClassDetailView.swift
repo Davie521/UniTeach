@@ -105,6 +105,7 @@ struct ClassDetailView: View {
     private func enrollInClass(_ baseClass: BaseClass) {
         // Handle class enrollment logic here
         print("Enrolled in \(baseClass.name)")
+        print(UserDefaults.standard.string(forKey: "userID") ?? "No user ID found")
     }
 }
 

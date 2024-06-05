@@ -19,8 +19,9 @@ final class LogInModel: ObservableObject {
         }
         
         do {
-            try await AuthenticationManager.shared.logInUser(email: email, password: password)
+            let authDataModel = try await AuthenticationManager.shared.logInUser(email: email, password: password)
             print("Email: \(email) logged in successfully.")
+            UserDefaults.standard.set(authDataModel.uid, forKey: "userID")
             return true
         } catch {
             print(error)
@@ -28,7 +29,6 @@ final class LogInModel: ObservableObject {
         }
     }
 }
-
 
 struct LogInView: View {
     @Binding var showLogInView: Bool

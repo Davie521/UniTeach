@@ -88,7 +88,7 @@ final class UserManager {
     func createNewUser(user: DatabaseUser) async throws {
         try userDocument(userId: user.id).setData(from: user, merge: false, encoder: encoder)
     }
-
+    
     func getUser(userId: String) async throws -> DatabaseUser {
         try await userDocument(userId: userId).getDocument(as: DatabaseUser.self, decoder: decoder)
     }
@@ -101,7 +101,7 @@ final class UserManager {
     }
     func updateUser(user: DatabaseUser) async throws {
         try userDocument(userId: user.id).setData(from: user, merge: true, encoder: encoder)
-
+        
     }
     
     func createBaseClass(userId: String, baseClass: BaseClass) async throws {
@@ -125,8 +125,18 @@ final class UserManager {
             .getDocuments()
         return try snapshot.documents.compactMap { try $0.data(as: DatabaseUser.self, decoder: decoder) }
     }
-
- 
-
-
+    
+    func getMyId() -> String? {
+        return UserDefaults.standard.string(forKey: "userID")
+    }
+    
+    // Method to clear the User ID when logging out
+    func logoutUser() {
+        UserDefaults.standard.removeObject(forKey: "userID")
+    }
+    
+    
+    
+    
+    
 }

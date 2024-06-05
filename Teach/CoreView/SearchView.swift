@@ -5,7 +5,7 @@ import Combine
 class SearchViewModel: ObservableObject {
     @Published var users: [DatabaseUser] = []
     @Published var searchText: String = ""
-
+    
     
     private var userManager = UserManager.shared
     private var cancellables = Set<AnyCancellable>()
@@ -45,7 +45,7 @@ class SearchViewModel: ObservableObject {
 @MainActor
 class RecommendationsViewModel: ObservableObject {
     @Published var recommendedUsers: [DatabaseUser] = []
-
+    
     func fetchRecommendedUsers() async {
         do {
             recommendedUsers = try await UserManager.shared.getRecommandedUsers()
@@ -58,7 +58,7 @@ class RecommendationsViewModel: ObservableObject {
 
 struct SearchView: View {
     @StateObject private var viewModel = SearchViewModel()
-
+    
     var body: some View {
         VStack {
             HeaderView(searchText: $viewModel.searchText, onSearch: {
@@ -68,7 +68,7 @@ struct SearchView: View {
             }, onCancel: {
                 viewModel.cancelSearch()
             })
-
+            
             NavigationView {
                 ScrollView {
                     contentBody
@@ -78,7 +78,7 @@ struct SearchView: View {
             }
         }
     }
-
+    
     @ViewBuilder
     var contentBody: some View {
         if viewModel.searchText.isEmpty {
@@ -105,7 +105,7 @@ struct HeaderView: View {
     @Binding var searchText: String
     var onSearch: () -> Void
     var onCancel: () -> Void
-
+    
     var body: some View {
         VStack {
             HStack {
@@ -151,6 +151,7 @@ struct AvatarView: View {
             .frame(width: 32, height: 32)
             .clipShape(Circle())
             .shadow(radius: 2)
+            .foregroundColor(.black)
     }
 }
 
@@ -165,7 +166,9 @@ struct StudentRecommendationsView: View {
                 .bold()
             LazyVStack(spacing: 16) {
                 ForEach(model.recommendedUsers) { user in
-                    StudentCardView(student: user)
+                    NavigationLink(destination: ProfileView(user: .constant(user))) {
+                        StudentCardView(student: user)
+                    }
                 }
             }
         }
@@ -201,13 +204,14 @@ struct CommunityView: View {
 
 struct StudentCardView: View {
     let student: DatabaseUser
-
+    
     var body: some View {
         HStack {
             AvatarView()
             VStack(alignment: .leading) {
                 Text(student.userName)
                     .font(.headline)
+                    .foregroundColor(.black)
                 Text(student.university)
                     .font(.subheadline)
                     .foregroundColor(.gray)
