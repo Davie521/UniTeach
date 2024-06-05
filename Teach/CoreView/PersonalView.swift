@@ -8,6 +8,8 @@ final class PersonalViewModel: ObservableObject {
     @Published var classes: [BaseClass] = []
     @Published var isLoading = false
     @Published var errorMessage: String?
+    @Published var classesTeaching: [LiveClass] = []
+    @Published var classesLearning: [LiveClass] = []
     
     private var db = Firestore.firestore()
     
@@ -29,7 +31,8 @@ final class PersonalViewModel: ObservableObject {
                 self.isLoading = false
             }
             await fetchClasses(for: fetchedUser.id)
-            
+            await fetchTeachingClasses(for: fetchedUser.id)
+            await fetchLearningClasses(for: fetchedUser.id)
         } catch {
             DispatchQueue.main.async {
                 self.errorMessage = "Failed to load user data: \(error.localizedDescription)"
@@ -50,13 +53,39 @@ final class PersonalViewModel: ObservableObject {
             }
         }
     }
+    
+    func fetchTeachingClasses(for userId: String) async {
+        do {
+            let fetchedClasses = try await LiveClassManager.shared.getClassTeaching(userId: userId)
+            DispatchQueue.main.async {
+                self.classesTeaching = fetchedClasses.sorted(by: { $0.date > $1.date })
+            }
+        } catch {
+            DispatchQueue.main.async {
+                self.errorMessage = "Failed to load teaching classes: \(error.localizedDescription)"
+            }
+        }
+    }
+    
+    func fetchLearningClasses(for userId: String) async {
+        do {
+            let fetchedClasses = try await LiveClassManager.shared.getClassLearning(userId: userId)
+            DispatchQueue.main.async {
+                self.classesLearning = fetchedClasses.sorted(by: { $0.date > $1.date })
+            }
+        } catch {
+            DispatchQueue.main.async {
+                self.errorMessage = "Failed to load learning classes: \(error.localizedDescription)"
+            }
+        }
+    }
 }
+
 
 struct PersonalView: View {
     @StateObject var viewModel = PersonalViewModel()
     
     var body: some View {
-        let user = viewModel.user
         ScrollView {
             VStack {
                 VStack {
@@ -66,7 +95,7 @@ struct PersonalView: View {
                         .foregroundColor(.gray)
                         .padding(.bottom, 10)
                     
-                    Text(user.userName)
+                    Text(viewModel.user.userName)
                         .font(.title)
                         .fontWeight(.bold)
                 }
@@ -90,58 +119,39 @@ struct PersonalView: View {
                                     Text("Institution")
                                         .font(.subheadline)
                                         .foregroundColor(.gray)
-                                    Text(user.university)
+                                    Text(viewModel.user.university)
                                 }
                                 Spacer()
                             }
                         }
                         
                         Group {
-                            Text("Courses Information")
+                            Text("Teaching Classes")
                                 .font(.headline)
                             
-                            HStack {
-                                VStack(alignment: .leading) {
-                                    Text("Courses Enrolled")
-                                        .font(.subheadline)
+                            VStack(alignment: .leading, spacing: 10) {
+                                if viewModel.classesTeaching.isEmpty {
+                                    Text("No classes available.")
                                         .foregroundColor(.gray)
-                                    Text("\(user.enrolledCourseNumber)")
-                                    
-                                }
-                                Spacer()
-                                VStack(alignment: .leading) {
-                                    Text("Courses Teaching")
-                                        .font(.subheadline)
-                                        .foregroundColor(.gray)
-                                    Text("\(user.teachingCourseNumber)")
-                                }
-                            }
-                        }
-                        
-                        Group {
-                            Text("Tags and Specializations")
-                                .font(.headline)
-                            
-                            ScrollView(.horizontal, showsIndicators: false) {
-                                HStack {
-                                    ForEach(user.tags, id: \.self) { tag in
-                                        TagView(tag: tag)
+                                } else {
+                                    ForEach(viewModel.classesTeaching) { liveClass in
+                                        LiveClassCardView(liveClass: liveClass, isTeaching: true)
                                     }
                                 }
                             }
                         }
                         
                         Group {
-                            Text("Classes")
+                            Text("Learning Classes")
                                 .font(.headline)
                             
                             VStack(alignment: .leading, spacing: 10) {
-                                if viewModel.classes.isEmpty {
+                                if viewModel.classesLearning.isEmpty {
                                     Text("No classes available.")
                                         .foregroundColor(.gray)
                                 } else {
-                                    ForEach(viewModel.classes) { baseClass in
-                                        ClassCardView(baseClass: baseClass)
+                                    ForEach(viewModel.classesLearning) { liveClass in
+                                        LiveClassCardView(liveClass: liveClass, isTeaching: false)
                                     }
                                 }
                             }
@@ -162,6 +172,50 @@ struct PersonalView: View {
         }
     }
 }
+
+struct LiveClassCardView: View {
+    var liveClass: LiveClass
+    var isTeaching: Bool
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Text(liveClass.name)
+                    .font(.headline)
+                    .fontWeight(.bold)
+                Spacer()
+                Text("Duration: \(liveClass.duration) min")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+            }
+            
+            Text(liveClass.note)
+                .font(.subheadline)
+                .foregroundColor(.secondary)
+            
+            HStack {
+                Spacer()
+                Text("Date: \(liveClass.date, formatter: DateFormatter.shortDate)")
+                    .font(.subheadline)
+                    .foregroundColor(.secondary)
+            }
+        }
+        .padding()
+        .background(isTeaching ? Color.blue.opacity(0.1) : Color.green.opacity(0.1))
+        .cornerRadius(10)
+        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 5)
+    }
+}
+
+extension DateFormatter {
+    static var shortDate: DateFormatter {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .short
+        formatter.timeStyle = .short
+        return formatter
+    }
+}
+
 
 struct ClassCardView: View {
     var baseClass: BaseClass

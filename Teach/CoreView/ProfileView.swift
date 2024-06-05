@@ -17,6 +17,7 @@ final class ProfileViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var errorMessage: String?
     
+    
     private var userId: String
     private var db = Firestore.firestore()
     
@@ -40,6 +41,7 @@ final class ProfileViewModel: ObservableObject {
             }
         }
     }
+    
 }
 
 
@@ -119,6 +121,10 @@ struct ProfileView: View {
                                 }
                             }
                         }
+                        
+                        Group {
+                            
+                        }
                     }
                     .padding()
                 }
@@ -137,7 +143,7 @@ struct ProfileView: View {
 
 struct ProfileClassCardView: View {
     var baseClass: BaseClass
-
+    
     var body: some View {
         NavigationLink(destination: ClassDetailView(baseClass: baseClass)) {
             VStack(alignment: .leading, spacing: 8) {

@@ -1,14 +1,8 @@
-//
-//  classDetailView.swift
-//  Teach
-//
-//  Created by Davie on 05/06/2024.
-//
-
 import SwiftUI
 
 struct ClassDetailView: View {
     var baseClass: BaseClass
+    @State private var showRegistrationView = false
 
     var body: some View {
         ScrollView {
@@ -76,11 +70,12 @@ struct ClassDetailView: View {
                     }
                 }
                 .padding(.horizontal)
+
                 Spacer()
-                Spacer()
+
                 // Enroll Button
                 Button(action: {
-                    enrollInClass(baseClass)
+                    showRegistrationView = true
                 }) {
                     Text("Enroll")
                         .frame(maxWidth: .infinity)
@@ -100,12 +95,97 @@ struct ClassDetailView: View {
             .padding()
             .navigationTitle("Class Details")
         }
+        .sheet(isPresented: $showRegistrationView) {
+            RegisterClassView(baseClass: baseClass)
+        }
+    }
+}
+
+struct RegisterClassView: View {
+    var baseClass: BaseClass
+    @State private var selectedDate = Date()
+    @State private var duration = 60
+    @State private var note = ""
+    @Environment(\.dismiss) var dismiss
+
+    var body: some View {
+        NavigationView {
+            VStack(spacing: 20) {
+                DatePicker("Select Date and Time", selection: $selectedDate, displayedComponents: [.date, .hourAndMinute])
+                    .datePickerStyle(CompactDatePickerStyle())
+                    .padding()
+
+                Picker("Select Duration", selection: $duration) {
+                    Text("20 min").tag(20)
+                    Text("30 min").tag(30)
+                    Text("60 min").tag(60)
+                    Text("90 min").tag(90)
+                    Text("120 min").tag(120)
+                }
+                .pickerStyle(SegmentedPickerStyle())
+                .padding()
+
+                VStack(alignment: .leading) {
+                    Text("Enter a note")
+                        .font(.headline)
+                        .padding(.bottom, 5)
+
+                    TextEditor(text: $note)
+                        .frame(height: 100)
+                        .padding(10)
+                        .background(Color(.secondarySystemBackground))
+                        .cornerRadius(10)
+                        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 5)
+                }
+                .padding(.horizontal)
+
+                Spacer()
+
+                Button(action: {
+                    createLiveClass()
+                }) {
+                    Text("Confirm")
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(15)
+                        .shadow(color: Color.black.opacity(0.2), radius: 10, x: 0, y: 5)
+                }
+                .padding(.horizontal)
+                .padding(.bottom)
+            }
+            .padding()
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                }
+            }
+        }
     }
 
-    private func enrollInClass(_ baseClass: BaseClass) {
-        // Handle class enrollment logic here
-        print("Enrolled in \(baseClass.name)")
-        print(UserDefaults.standard.string(forKey: "userID") ?? "No user ID found")
+    private func createLiveClass() {
+        let userID = UserDefaults.standard.string(forKey: "userID") ?? "No user ID found"
+        let newLiveClass = LiveClass(
+            id: UUID().uuidString,
+            name: baseClass.name,
+            classid: baseClass.id,
+            teacherId: baseClass.teacherId,
+            studentId: userID,
+            date: selectedDate,
+            duration: duration,
+            note: note
+        )
+        Task {
+            do {
+                try await LiveClassManager.shared.createLiveClass(liveClass: newLiveClass)
+                dismiss()
+            } catch {
+                print("Failed to create live class: \(error)")
+            }
+        }
     }
 }
 
