@@ -9,7 +9,7 @@ import SwiftUI
 
 struct EditClassView: View {
     @Binding var baseClass: BaseClass
-    @StateObject private var classViewModel = ClassViewModel()
+    @ObservedObject var settingsModel: SettingsModel
     @Environment(\.dismiss) private var dismiss
     
     @State private var newClassPrice: Double = 0.0
@@ -41,14 +41,14 @@ struct EditClassView: View {
                 
                 Button("Save") {
                     Task {
-                        await classViewModel.addClass(baseClass)
+                        await settingsModel.addClass(baseClass)
                         dismiss()
                     }
                 }
                 
                 Button("Delete Class") {
                     Task {
-                        await classViewModel.removeClass(baseClass)
+                        await settingsModel.removeClass(baseClass)
                         dismiss()
                     }
                 }
@@ -61,6 +61,6 @@ struct EditClassView: View {
 
 struct EditClassView_Previews: PreviewProvider {
     static var previews: some View {
-        EditClassView(baseClass: .constant(BaseClass(id: "1", name: "Math", description: "Mathematics", teacherId: "1", price: 100.0)))
+        EditClassView(baseClass: .constant(BaseClass(id: "1", name: "Math", description: "Mathematics", teacherId: "1", price: 100.0)), settingsModel: SettingsModel())
     }
 }

@@ -57,4 +57,8 @@ final class ClassManager {
         let snapshot = try await baseClassCollection.whereField("teacher_id", isEqualTo: userId).getDocuments()
         return try snapshot.documents.map { try $0.data(as: BaseClass.self, decoder: decoder) }
     }
+    
+    func updateBaseClass(baseClass: BaseClass) async throws {
+        try baseClassDocument(classId: baseClass.id).setData(from: baseClass, merge: true, encoder: encoder)
+    }
 }

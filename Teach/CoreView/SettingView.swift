@@ -1,8 +1,10 @@
 import SwiftUI
+import Combine
 
 @MainActor
 class SettingsModel: ObservableObject {
     @Published var user: DatabaseUser?
+    @Published var classes: [BaseClass] = []
     @Published var isLoading = false
     @Published var errorMessage: String?
 
@@ -12,6 +14,9 @@ class SettingsModel: ObservableObject {
         do {
             let authDataResult = try AuthenticationManager.shared.getAuthenticatedUser()
             user = try await UserManager.shared.getUser(userId: authDataResult.uid)
+            if user != nil {
+                try await fetchClasses()
+            }
             isLoading = false
         } catch {
             errorMessage = "Failed to load user data: \(error.localizedDescription)"
@@ -19,39 +24,18 @@ class SettingsModel: ObservableObject {
         }
     }
 
-    func updateUser() async throws {
-        guard let user else { return }
-        try await UserManager.shared.updateUser(user: user)
-    }
-
-    func logOut() throws {
-        try AuthenticationManager.shared.logOut()
-    }
-}
-
-
-class ClassViewModel: ObservableObject {
-    @Published var classes: [BaseClass] = []
-    @Published var isLoading = false
-    @Published var errorMessage: String?
-
-    func fetchClasses() async {
-        isLoading = true
-        errorMessage = nil
+    private func fetchClasses() async throws {
         do {
-            let fetchedClasses = try await ClassManager.shared.fetchAllClasses()
-            classes = fetchedClasses
-            isLoading = false
+            classes = try await ClassManager.shared.getBaseClassOfUser(userId: user?.id ?? "")
         } catch {
             errorMessage = "Failed to fetch classes: \(error.localizedDescription)"
-            isLoading = false
         }
     }
 
     func addClass(_ baseClass: BaseClass) async {
         do {
-            try await ClassManager.shared.createBaseClass(baseClass: baseClass)
-            await fetchClasses() // Refresh the class list
+            try await ClassManager.shared.updateBaseClass(baseClass: baseClass)
+            classes.append(baseClass)
         } catch {
             errorMessage = "Failed to add class: \(error.localizedDescription)"
         }
@@ -60,20 +44,30 @@ class ClassViewModel: ObservableObject {
     func removeClass(_ baseClass: BaseClass) async {
         do {
             try await ClassManager.shared.deleteBaseClass(baseClass: baseClass)
-            await fetchClasses() // Refresh the class list
+            classes.removeAll { $0.id == baseClass.id }
         } catch {
             errorMessage = "Failed to remove class: \(error.localizedDescription)"
         }
     }
+
+    func updateUser() async throws {
+        guard let user = user else { return }
+        try await UserManager.shared.updateUser(user: user)
+    }
+
+    func logOut() throws {
+        try AuthenticationManager.shared.logOut()
+        user = nil // Clear user data upon logout
+        classes = [] // Clear classes as well
+    }
 }
+
 
 
 struct SettingView: View {
     @Environment(\.dismiss) private var dismiss
     @Binding var showLogInView: Bool
-    @StateObject private var settingsModel = SettingsModel()
-    @StateObject private var classViewModel = ClassViewModel()
-    @State private var newTag: String = ""
+    @ObservedObject var settingsModel: SettingsModel
     @State private var newClass = BaseClass(id: UUID().uuidString, name: "", description: "", teacherId: "", price: 0.0)
     @State private var isEditingClass = false
 
@@ -81,15 +75,7 @@ struct SettingView: View {
         NavigationStack {
             VStack(spacing: 20) {
                 if let user = settingsModel.user {
-                    VStack(spacing: 15) {
-                        profileSection(user: user)
-                        classesSection()
-                        saveButton
-                    }
-                    .padding()
-                    .background(Color(.systemBackground).opacity(0.9))
-                    .cornerRadius(15)
-                    .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 10)
+                    userSection(user: user)
                 } else if settingsModel.isLoading {
                     ProgressView()
                 } else if let errorMessage = settingsModel.errorMessage {
@@ -97,23 +83,31 @@ struct SettingView: View {
                         .foregroundColor(.red)
                 }
 
+                Spacer()
+
                 logOutButton
             }
             .padding()
             .navigationTitle("Settings")
             .task {
                 await settingsModel.loadCurrentUser()
-                await classViewModel.fetchClasses()
             }
             .sheet(isPresented: $isEditingClass) {
-                EditClassView(baseClass: $newClass)
-                    .onDisappear {
-                        Task {
-                            await classViewModel.fetchClasses()
-                        }
-                    }
+                EditClassView(baseClass: $newClass, settingsModel: settingsModel)
             }
         }
+    }
+
+    private func userSection(user: DatabaseUser) -> some View {
+        VStack(spacing: 15) {
+            profileSection(user: user)
+            saveButton
+            classesSection()
+        }
+        .padding()
+        .background(Color(.systemBackground).opacity(0.9))
+        .cornerRadius(15)
+        .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 10)
     }
 
     @ViewBuilder
@@ -126,9 +120,7 @@ struct SettingView: View {
             
             TextField("Username", text: Binding(
                 get: { user.userName },
-                set: { newValue in
-                    settingsModel.user?.userName = newValue
-                }
+                set: { settingsModel.user?.userName = $0 }
             ))
             .textFieldStyle(PlainTextFieldStyle())
             .padding()
@@ -137,9 +129,7 @@ struct SettingView: View {
             
             TextField("University", text: Binding(
                 get: { user.university },
-                set: { newValue in
-                    settingsModel.user?.university = newValue
-                }
+                set: { settingsModel.user?.university = $0 }
             ))
             .textFieldStyle(PlainTextFieldStyle())
             .padding()
@@ -174,38 +164,36 @@ struct SettingView: View {
             }
             .padding()
 
-            if classViewModel.classes.isEmpty {
-                Text("No classes available.")
-                    .foregroundColor(.gray)
-                    .padding()
-            } else {
-                ForEach(classViewModel.classes) { baseClass in
-                    HStack {
-                        VStack(alignment: .leading) {
-                            Text(baseClass.name)
-                                .font(.headline)
-                            Text(baseClass.description)
-                                .font(.subheadline)
-                        }
-                        Spacer()
-                        Button(action: {
-                            newClass = baseClass
-                            isEditingClass = true
-                        }) {
-                            Image(systemName: "pencil")
-                                .foregroundColor(.blue)
-                        }
-                    }
-                    .padding()
-                    .background(Color(.secondarySystemBackground))
-                    .cornerRadius(10)
-                }
+            ForEach(settingsModel.classes) { baseClass in
+                classRow(for: baseClass)
             }
         }
     }
 
+    private func classRow(for baseClass: BaseClass) -> some View {
+        HStack {
+            VStack(alignment: .leading) {
+                Text(baseClass.name)
+                    .font(.headline)
+                Text(baseClass.description)
+                    .font(.subheadline)
+            }
+            Spacer()
+            Button(action: {
+                newClass = baseClass
+                isEditingClass = true
+            }) {
+                Image(systemName: "pencil")
+                    .foregroundColor(.blue)
+            }
+        }
+        .padding()
+        .background(Color(.secondarySystemBackground))
+        .cornerRadius(10)
+    }
+
     private var saveButton: some View {
-        Button(action: {
+        Button("Save Changes") {
             Task {
                 do {
                     try await settingsModel.updateUser()
@@ -214,48 +202,40 @@ struct SettingView: View {
                     print("Failed to update user: \(error.localizedDescription)")
                 }
             }
-        }) {
-            Text("Save Changes")
-                .frame(maxWidth: .infinity)
-                .padding()
-                .background(LinearGradient(
-                    gradient: Gradient(colors: [Color.blue, Color.purple]),
-                    startPoint: .leading,
-                    endPoint: .trailing
-                ))
-                .foregroundColor(.white)
-                .cornerRadius(15)
         }
+        .buttonStyle(FilledButtonStyle())
     }
 
     private var logOutButton: some View {
-        Button(action: {
+        Button("Log Out") {
             Task {
                 do {
                     try settingsModel.logOut()
                     showLogInView = true
                     dismiss()
                 } catch {
-                    print(error)
+                    print("Logout failed: \(error)")
                 }
             }
-        }) {
-            Text("Log Out")
-                .frame(maxWidth: .infinity)
-                .padding()
-                .background(LinearGradient(
-                    gradient: Gradient(colors: [Color.red, Color.orange]),
-                    startPoint: .leading,
-                    endPoint: .trailing
-                ))
-                .foregroundColor(.white)
-                .cornerRadius(15)
         }
+        .buttonStyle(FilledButtonStyle())
+    }
+}
+
+struct FilledButtonStyle: ButtonStyle {
+    func makeBody(configuration: Self.Configuration) -> some View {
+        configuration.label
+            .frame(maxWidth: .infinity)
+            .padding()
+            .background(Color.blue)
+            .foregroundColor(.white)
+            .cornerRadius(15)
+            .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
     }
 }
 
 struct SettingView_Previews: PreviewProvider {
     static var previews: some View {
-        SettingView(showLogInView: .constant(false))
+        SettingView(showLogInView: .constant(false), settingsModel: SettingsModel())
     }
 }

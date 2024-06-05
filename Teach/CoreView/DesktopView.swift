@@ -9,32 +9,30 @@ import SwiftUI
 
 struct DesktopView: View {
     @Binding var showLogInView: Bool
+    @StateObject private var settingsModel = SettingsModel() // Instantiate SettingsModel
+
     var body: some View {
-            TabView {
-                SearchView()
-                    .tabItem {
-                        Label("Search", systemImage: "magnifyingglass")
-                    }
-                
-                NavigationView {
-                    PersonalView()
-                        .toolbar {
-                            ToolbarItem(placement: .navigationBarTrailing) {
-                                NavigationLink(destination: SettingView(showLogInView: .constant(false))) {
-                                    Image(systemName: "gearshape.fill").font(.headline).foregroundColor(.black)
-                                }
+        TabView {
+            SearchView()
+                .tabItem {
+                    Label("Search", systemImage: "magnifyingglass")
+                }
+            
+            NavigationView {
+                PersonalView()
+                    .toolbar {
+                        ToolbarItem(placement: .navigationBarTrailing) {
+                            NavigationLink(destination: SettingView(showLogInView: $showLogInView, settingsModel: settingsModel)) {
+                                Image(systemName: "gearshape.fill").font(.headline).foregroundColor(.black)
                             }
                         }
-
-                }
-                    .tabItem {
-                        Label("Me", systemImage: "person")
                     }
-                    
             }
-            
+            .tabItem {
+                Label("Me", systemImage: "person")
+            }
         }
-
+    }
 }
 
 struct DesktopView_Previews: PreviewProvider {

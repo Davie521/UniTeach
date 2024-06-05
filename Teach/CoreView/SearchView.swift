@@ -43,10 +43,9 @@ class SearchViewModel: ObservableObject {
 
 struct SearchView: View {
     @StateObject private var viewModel = SearchViewModel()
-    
+
     var body: some View {
         VStack {
-            // Using HeaderView which internally uses the updated SearchBar
             HeaderView(searchText: $viewModel.searchText, onSearch: {
                 Task {
                     await viewModel.searchUsers()
@@ -54,47 +53,55 @@ struct SearchView: View {
             }, onCancel: {
                 viewModel.cancelSearch()
             })
-            
-            ScrollView {
-                if viewModel.searchText.isEmpty {
-                    VStack(alignment: .leading, spacing: 16) {
-                        StudentRecommendationsView(searchText: viewModel.searchText)
-                        CommunityView(searchText: viewModel.searchText)
-                    }
-                    .padding()
-                } else {
-                    VStack(alignment: .leading, spacing: 16) {
-                        ForEach(viewModel.users, id: \.id) { user in
-                            StudentCardView(student: user)
-                        }
-                    }
-                    .padding()
+
+            NavigationView {
+                ScrollView {
+                    contentBody
                 }
+                .navigationBarTitle("", displayMode: .inline)
+                .navigationBarHidden(true)
             }
         }
-        .background(Color(.systemBackground).ignoresSafeArea())
+    }
+
+    @ViewBuilder
+    var contentBody: some View {
+        if viewModel.searchText.isEmpty {
+            VStack(alignment: .leading, spacing: 16) {
+                StudentRecommendationsView(searchText: viewModel.searchText)
+                CommunityView(searchText: viewModel.searchText)
+            }
+            .padding(.horizontal)
+        } else {
+            VStack(alignment: .leading, spacing: 16) {
+                ForEach(viewModel.users, id: \.id) { user in
+                    NavigationLink(destination: ProfileView(user: .constant(user))) {
+                        StudentCardView(student: user)
+                    }
+                }
+            }
+            .padding(.horizontal)
+        }
     }
 }
-
 
 
 struct HeaderView: View {
     @Binding var searchText: String
     var onSearch: () -> Void
     var onCancel: () -> Void
-    
+
     var body: some View {
         VStack {
             HStack {
                 SearchBar(searchText: $searchText, onSearch: onSearch, onCancel: onCancel)
             }
-            .padding()
-            .background(Color(.systemBackground))
-            .cornerRadius(10)
-            .shadow(radius: 0.1)
+            .padding(.horizontal)
+            .padding(.top, 8) // Adjust padding specifically for your layout needs
         }
     }
 }
+
 
 
 struct SearchBar: View {
@@ -108,10 +115,6 @@ struct SearchBar: View {
                 .padding(8)
                 .background(Color(.systemGray6))
                 .cornerRadius(8)
-                .onSubmit(onSearch)
-                .submitLabel(.search)
-            
-            // Conditional button that changes based on whether the user has begun typing
             Button(searchText.isEmpty ? "Search" : "Cancel") {
                 if searchText.isEmpty {
                     onSearch()
@@ -121,9 +124,10 @@ struct SearchBar: View {
             }
             .transition(.scale)
         }
-        .padding(.horizontal)
+        .padding(.horizontal)  // Control padding to affect overall size and placement
     }
 }
+//
 
 
 
@@ -180,41 +184,29 @@ struct CommunityView: View {
 
 struct StudentCardView: View {
     let student: DatabaseUser
-    
+
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack {
-                AvatarView()
-                VStack(alignment: .leading) {
-                    Text(student.userName)
-                        .font(.headline)
-                    Text(student.university)
-                        .font(.subheadline)
-                        .foregroundColor(.gray)
-                }
+        HStack {
+            AvatarView()
+            VStack(alignment: .leading) {
+                Text(student.userName)
+                    .font(.headline)
+                Text(student.university)
+                    .font(.subheadline)
+                    .foregroundColor(.gray)
             }
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack {
-                    ForEach(student.tags, id: \.self) { tag in
-                        Text(tag)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 4)
-                            .background(Color.blue)
-                            .foregroundColor(.white)
-                            .cornerRadius(10)
-                    }
-                }
-            }
+            Spacer()
+            Image(systemName: "chevron.right")
+                .foregroundColor(.secondary)
         }
         .padding()
-        .frame(maxWidth: .infinity) // Ensure the card takes the full width available
-        .background(Color(.systemBackground))
+        .frame(maxWidth: .infinity)
+        .background(Color.white)
         .cornerRadius(8)
-        .shadow(radius: 0.5)
+        .shadow(radius: 1)
+        .padding(.horizontal)
     }
 }
-
-
 
 struct CommunityCardView: View {
     let community: Community
