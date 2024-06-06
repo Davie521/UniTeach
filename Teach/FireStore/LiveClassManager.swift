@@ -9,17 +9,17 @@ import Foundation
 import FirebaseFirestore
 import FirebaseFirestoreSwift
 
-
 class LiveClass: Codable, Identifiable {
-    
     var id: String
     var name: String
     var classid: String
     var teacherId: String
     var studentId: String
     var date: Date
+    var endDate: Date
     var duration: Int
     var note: String
+    var confirmed: Bool
     
     init(id: String, name: String, classid: String, teacherId: String, studentId: String, date: Date, duration: Int, note: String) {
         self.id = id
@@ -28,8 +28,10 @@ class LiveClass: Codable, Identifiable {
         self.teacherId = teacherId
         self.studentId = studentId
         self.date = date
+        self.endDate = date.addingTimeInterval(TimeInterval(duration * 60))
         self.duration = duration
         self.note = note
+        self.confirmed = false
     }
 }
 
@@ -68,5 +70,10 @@ final class LiveClassManager {
         let snapshot = try await liveClassCollection.whereField("student_id", isEqualTo: userId).getDocuments()
         return try snapshot.documents.map { try $0.data(as: LiveClass.self, decoder: decoder) }
     }
+    
+    func confirmLiveClass(classId: String) async throws {
+        try await liveClassDocument(classId: classId).updateData(["confirmed": true])
+    }
+    
     
 }

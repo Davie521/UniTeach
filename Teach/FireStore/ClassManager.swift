@@ -48,6 +48,10 @@ final class ClassManager {
         try baseClassDocument(classId: baseClass.id).setData(from: baseClass, merge: false, encoder: encoder)
     }
     
+    func getBaseClass(classId: String) async throws -> BaseClass {
+        try await baseClassDocument(classId: classId).getDocument(as: BaseClass.self, decoder: decoder)
+    }
+    
     func fetchAllClasses() async throws -> [BaseClass] {
         let snapshot = try await baseClassCollection.getDocuments()
         return try snapshot.documents.map { try $0.data(as: BaseClass.self, decoder: decoder) }

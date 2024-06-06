@@ -12,6 +12,7 @@
 		DD2D16BE2C067B9E00C31F60 /* DesktopView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD2D16BD2C067B9E00C31F60 /* DesktopView.swift */; };
 		DD359B112C04CBDE007E28BA /* UserManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD359B102C04CBDE007E28BA /* UserManager.swift */; };
 		DD498F392C1132190094263A /* LiveClassManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD498F382C1132190094263A /* LiveClassManager.swift */; };
+		DD498F3D2C11FF320094263A /* ReviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD498F3C2C11FF320094263A /* ReviewView.swift */; };
 		DD6622882C08C60000B5ABBA /* AuthenticationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = DD6622872C08C60000B5ABBA /* AuthenticationManager.swift */; };
 		DD761A732C04B9CF00F024AA /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = DD761A722C04B9CF00F024AA /* FirebaseFirestore */; };
 		DD761A752C04B9CF00F024AA /* FirebaseFirestoreSwift in Frameworks */ = {isa = PBXBuildFile; productRef = DD761A742C04B9CF00F024AA /* FirebaseFirestoreSwift */; };
@@ -39,6 +40,7 @@
 		DD2D16BD2C067B9E00C31F60 /* DesktopView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DesktopView.swift; sourceTree = "<group>"; };
 		DD359B102C04CBDE007E28BA /* UserManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserManager.swift; sourceTree = "<group>"; };
 		DD498F382C1132190094263A /* LiveClassManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LiveClassManager.swift; sourceTree = "<group>"; };
+		DD498F3C2C11FF320094263A /* ReviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewView.swift; sourceTree = "<group>"; };
 		DD6622872C08C60000B5ABBA /* AuthenticationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationManager.swift; sourceTree = "<group>"; };
 		DD7973902C0E24570070FE42 /* ClassManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClassManager.swift; sourceTree = "<group>"; };
 		DD7973922C0E2A5B0070FE42 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
@@ -93,6 +95,7 @@
 				DD7973942C0F28230070FE42 /* ProfileView.swift */,
 				DD7973982C0F40010070FE42 /* EditClassView.swift */,
 				DD79739A2C10C6990070FE42 /* ClassDetailView.swift */,
+				DD498F3C2C11FF320094263A /* ReviewView.swift */,
 			);
 			path = CoreView;
 			sourceTree = "<group>";
@@ -249,6 +252,7 @@
 				DDC196692C0380D600403717 /* RootView.swift in Sources */,
 				DDC1964C2C03709B00403717 /* ContentView.swift in Sources */,
 				DD79739B2C10C6990070FE42 /* ClassDetailView.swift in Sources */,
+				DD498F3D2C11FF320094263A /* ReviewView.swift in Sources */,
 				DD2D16BE2C067B9E00C31F60 /* DesktopView.swift in Sources */,
 				DDC1964A2C03709B00403717 /* TeachApp.swift in Sources */,
 			);

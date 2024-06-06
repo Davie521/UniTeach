@@ -10,6 +10,7 @@ final class PersonalViewModel: ObservableObject {
     @Published var errorMessage: String?
     @Published var classesTeaching: [LiveClass] = []
     @Published var classesLearning: [LiveClass] = []
+    @Published var confirmedClassesLearning: [LiveClass] = []
     
     private var db = Firestore.firestore()
     
@@ -58,7 +59,8 @@ final class PersonalViewModel: ObservableObject {
         do {
             let fetchedClasses = try await LiveClassManager.shared.getClassTeaching(userId: userId)
             DispatchQueue.main.async {
-                self.classesTeaching = fetchedClasses.sorted(by: { $0.date > $1.date })
+                let currentDate = Date()
+                self.classesTeaching = fetchedClasses.filter { $0.date > currentDate }.sorted(by: { $0.date > $1.date })
             }
         } catch {
             DispatchQueue.main.async {
@@ -71,7 +73,7 @@ final class PersonalViewModel: ObservableObject {
         do {
             let fetchedClasses = try await LiveClassManager.shared.getClassLearning(userId: userId)
             DispatchQueue.main.async {
-                self.classesLearning = fetchedClasses.sorted(by: { $0.date > $1.date })
+                self.classesLearning = fetchedClasses.filter { !$0.confirmed }.sorted(by: { $0.date > $1.date })
             }
         } catch {
             DispatchQueue.main.async {
@@ -79,8 +81,21 @@ final class PersonalViewModel: ObservableObject {
             }
         }
     }
+    
+    func confirmLearningClass(_ liveClass: LiveClass) async {
+        do {
+            try await LiveClassManager.shared.confirmLiveClass(classId: liveClass.id)
+            DispatchQueue.main.async {
+                self.classesLearning.removeAll { $0.id == liveClass.id }
+                self.confirmedClassesLearning.append(liveClass)
+            }
+        } catch {
+            DispatchQueue.main.async {
+                self.errorMessage = "Failed to confirm class: \(error.localizedDescription)"
+            }
+        }
+    }
 }
-
 
 struct PersonalView: View {
     @StateObject var viewModel = PersonalViewModel()
@@ -135,7 +150,7 @@ struct PersonalView: View {
                                         .foregroundColor(.gray)
                                 } else {
                                     ForEach(viewModel.classesTeaching) { liveClass in
-                                        LiveClassCardView(liveClass: liveClass, isTeaching: true)
+                                        LiveClassCardView(liveClass: liveClass)
                                     }
                                 }
                             }
@@ -151,7 +166,9 @@ struct PersonalView: View {
                                         .foregroundColor(.gray)
                                 } else {
                                     ForEach(viewModel.classesLearning) { liveClass in
-                                        LiveClassCardView(liveClass: liveClass, isTeaching: false)
+                                        if(!liveClass.confirmed) {
+                                            LiveClassCardView(liveClass: liveClass)
+                                        }
                                     }
                                 }
                             }
@@ -173,9 +190,11 @@ struct PersonalView: View {
     }
 }
 
+
+
 struct LiveClassCardView: View {
     var liveClass: LiveClass
-    var isTeaching: Bool
+    @State private var showReview = false
     
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -199,11 +218,30 @@ struct LiveClassCardView: View {
                     .font(.subheadline)
                     .foregroundColor(.secondary)
             }
+            
+            if classEnd(LiveClass: liveClass) {
+                Button("Confirm") {
+                    showReview = true
+                }
+                .padding(.horizontal, 10)
+                .padding(.vertical, 5)
+                .background(Color.blue)
+                .foregroundColor(.white)
+                .cornerRadius(10)
+                .sheet(isPresented: $showReview) {
+                    ReviewView(liveClass: liveClass)
+                }
+            }
         }
         .padding()
-        .background(isTeaching ? Color.blue.opacity(0.1) : Color.green.opacity(0.1))
+        .background(Color(.secondarySystemBackground)) // Use system background color
         .cornerRadius(10)
-        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 5)
+        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 5) // Apply subtle shadow
+    }
+    
+    func classEnd(LiveClass: LiveClass) -> Bool {
+        let currentDate = Date()
+        return LiveClass.date <= currentDate
     }
 }
 
