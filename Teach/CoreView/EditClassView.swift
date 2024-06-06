@@ -20,10 +20,11 @@ struct EditClassView: View {
             Form {
                 Section(header: Text("Class Information")) {
                     TextField("Class Name", text: $baseClass.name)
-                    TextEditor(text: $baseClass.description)
-                        .frame(height: 150)
                 }
-                
+                Section(header: Text("Description")) {
+                    TextEditor(text: $baseClass.description)
+                        .frame(height: 100)
+                }
                 Section(header: Text("Price")) {
                     Picker("Class Price", selection: $newClassPrice) {
                         ForEach(priceOptions, id: \.self) { price in
@@ -39,13 +40,6 @@ struct EditClassView: View {
                     }
                 }
                 
-                Button("Save") {
-                    Task {
-                        await settingsModel.addClass(baseClass)
-                        dismiss()
-                    }
-                }
-                
                 Button("Delete Class") {
                     Task {
                         await settingsModel.removeClass(baseClass)
@@ -55,6 +49,17 @@ struct EditClassView: View {
                 .foregroundColor(.red)
             }
             .navigationTitle("Edit Class")
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button("Save") {
+                        Task {
+                            await settingsModel.updateClass(baseClass)
+                            dismiss()
+                        }
+                    }
+                    .bold()
+                }
+            }
         }
     }
 }

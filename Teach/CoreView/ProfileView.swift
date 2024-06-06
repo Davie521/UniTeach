@@ -93,18 +93,18 @@ struct ProfileView: View {
                                 Spacer()
                             }
                         }
-//                        Group {
-//                            Text("Tags and Specializations")
-//                                .font(.headline)
-//                            
-//                            ScrollView(.horizontal, showsIndicators: false) {
-//                                HStack {
-//                                    ForEach(user.tags, id: \.self) { tag in
-//                                        TagView(tag: tag)
-//                                    }
-//                                }
-//                            }
-//                        }
+                        Group {
+                            Text("Tags and Specializations")
+                                .font(.headline)
+                            
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack {
+                                    ForEach(user.tags, id: \.self) { tag in
+                                        TagView(tag: tag)
+                                    }
+                                }
+                            }
+                        }
                         
                         Group {
                             Text("Classes")

@@ -40,6 +40,17 @@ class SettingsModel: ObservableObject {
             errorMessage = "Failed to add class: \(error.localizedDescription)"
         }
     }
+    
+    func updateClass(_ baseClass: BaseClass) async {
+        do {
+            try await ClassManager.shared.updateBaseClass(baseClass: baseClass)
+            if let index = classes.firstIndex(where: { $0.id == baseClass.id }) {
+                classes[index] = baseClass
+            }
+        } catch {
+            errorMessage = "Failed to update class: \(error.localizedDescription)"
+        }
+    }
 
     func removeClass(_ baseClass: BaseClass) async {
         do {
@@ -60,7 +71,19 @@ class SettingsModel: ObservableObject {
         user = nil // Clear user data upon logout
         classes = [] // Clear classes as well
     }
+    
+    func addTag(_ tag: String) {
+        guard var user = user, user.tags.count < 2, tag.count <= 10 else { return }
+        user.tags.append(tag)
+        self.user = user
+    }
+    
+    func removeTag(_ tag: String) {
+        user?.tags.removeAll { $0 == tag }
+        self.user = user
+    }
 }
+
 
 
 
@@ -70,24 +93,29 @@ struct SettingView: View {
     @ObservedObject var settingsModel: SettingsModel
     @State private var newClass = BaseClass(id: UUID().uuidString, name: "", description: "", teacherId: "", price: 0.0, rating: 0.0, reviews: [])
     @State private var isEditingClass = false
+    @State private var newTag: String = ""
 
     var body: some View {
         NavigationStack {
-            VStack(spacing: 20) {
-                if let user = settingsModel.user {
-                    userSection(user: user)
-                } else if settingsModel.isLoading {
-                    ProgressView()
-                } else if let errorMessage = settingsModel.errorMessage {
-                    Text(errorMessage)
-                        .foregroundColor(.red)
+            ScrollView {
+                VStack(spacing: 20) {
+                    if let user = settingsModel.user {
+                        classesSection()
+                        tagsSection()
+                        userSection(user: user)
+                    } else if settingsModel.isLoading {
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle())
+                    } else if let errorMessage = settingsModel.errorMessage {
+                        Text(errorMessage)
+                            .foregroundColor(.red)
+                    }
+                    
+                    saveButton
+                    logOutButton
                 }
-
-                Spacer()
-
-                logOutButton
+                .padding()
             }
-            .padding()
             .navigationTitle("Settings")
             .task {
                 await settingsModel.loadCurrentUser()
@@ -98,20 +126,121 @@ struct SettingView: View {
         }
     }
 
-    private func userSection(user: DatabaseUser) -> some View {
-        VStack(spacing: 15) {
-            profileSection(user: user)
-            saveButton
-            classesSection()
+    private func classesSection() -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Classes")
+                .font(.title2)
+                .fontWeight(.bold)
+                .foregroundColor(.primary)
+            
+            Button(action: {
+                newClass = BaseClass(id: UUID().uuidString, name: "", description: "", teacherId: settingsModel.user?.id ?? "", price: 0.0, rating: 0.0, reviews: [])
+                isEditingClass = true
+            }) {
+                HStack {
+                    Image(systemName: "plus")
+                    Text("Add New Class")
+                }
+                .padding()
+                .background(Color.gray)
+                .foregroundColor(.white)
+                .cornerRadius(10)
+            }
+
+            ForEach(settingsModel.classes) { baseClass in
+                classRow(for: baseClass)
+            }
         }
         .padding()
-        .background(Color(.systemBackground).opacity(0.9))
+        .background(Color(.secondarySystemBackground))
         .cornerRadius(15)
-        .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 10)
+        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 5)
     }
 
-    @ViewBuilder
-    private func profileSection(user: DatabaseUser) -> some View {
+    private func classRow(for baseClass: BaseClass) -> some View {
+        HStack {
+            VStack(alignment: .leading) {
+                Text(baseClass.name)
+                    .font(.headline)
+                Text(baseClass.description)
+                    .font(.subheadline)
+            }
+            Spacer()
+            Button(action: {
+                newClass = baseClass
+                isEditingClass = true
+            }) {
+                Image(systemName: "pencil")
+                    .foregroundColor(.primary)
+            }
+        }
+        .padding()
+        .background(Color(.secondarySystemBackground))
+        .cornerRadius(10)
+    }
+
+    private func tagsSection() -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Tags")
+                .font(.title2)
+                .fontWeight(.bold)
+                .foregroundColor(.primary)
+            
+            if settingsModel.user?.tags.count ?? 0 < 2 {
+                HStack {
+                    TextField("New Tag", text: $newTag)
+                        .textFieldStyle(PlainTextFieldStyle())
+                        .padding()
+                        .background(Color(.secondarySystemBackground))
+                        .cornerRadius(10)
+                    
+                    Button(action: {
+                        if !newTag.isEmpty && newTag.count <= 10 {
+                            settingsModel.addTag(newTag)
+                            newTag = ""
+                        }
+                    }) {
+                        Image(systemName: "plus.circle.fill")
+                            .foregroundColor(.primary)
+                            .font(.title2)
+                    }
+                }
+                .padding(.bottom)
+            }
+
+            ForEach(settingsModel.user?.tags ?? [], id: \.self) { tag in
+                tagRow(for: tag)
+            }
+        }
+        .padding()
+        .background(Color(.secondarySystemBackground))
+        .cornerRadius(15)
+        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 5)
+    }
+
+    private func tagRow(for tag: String) -> some View {
+        HStack {
+            Text(tag)
+                .font(.body)
+                .padding(5)
+                .background(Color.gray)
+                .foregroundColor(.white)
+                .cornerRadius(5)
+            
+            Spacer()
+            
+            Button(action: {
+                settingsModel.removeTag(tag)
+            }) {
+                Image(systemName: "minus.circle.fill")
+                    .foregroundColor(.red)
+                    .font(.title2)
+            }
+        }
+        .padding(.vertical, 5)
+    }
+
+    private func userSection(user: DatabaseUser) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             Text("Profile")
                 .font(.title2)
@@ -143,53 +272,10 @@ struct SettingView: View {
                 .background(Color(.secondarySystemBackground))
                 .cornerRadius(10)
         }
-    }
-
-    @ViewBuilder
-    private func classesSection() -> some View {
-        VStack(alignment: .leading, spacing: 10) {
-            Text("Classes")
-                .font(.title2)
-                .fontWeight(.bold)
-                .foregroundColor(.primary)
-            
-            Button(action: {
-                newClass = BaseClass(id: UUID().uuidString, name: "", description: "", teacherId: settingsModel.user?.id ?? "", price: 0.0, rating: 0.0, reviews: [])
-                isEditingClass = true
-            }) {
-                HStack {
-                    Image(systemName: "plus")
-                    Text("Add New Class")
-                }
-            }
-            .padding()
-
-            ForEach(settingsModel.classes) { baseClass in
-                classRow(for: baseClass)
-            }
-        }
-    }
-
-    private func classRow(for baseClass: BaseClass) -> some View {
-        HStack {
-            VStack(alignment: .leading) {
-                Text(baseClass.name)
-                    .font(.headline)
-                Text(baseClass.description)
-                    .font(.subheadline)
-            }
-            Spacer()
-            Button(action: {
-                newClass = baseClass
-                isEditingClass = true
-            }) {
-                Image(systemName: "pencil")
-                    .foregroundColor(.blue)
-            }
-        }
         .padding()
         .background(Color(.secondarySystemBackground))
-        .cornerRadius(10)
+        .cornerRadius(15)
+        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 5)
     }
 
     private var saveButton: some View {
@@ -227,9 +313,9 @@ struct FilledButtonStyle: ButtonStyle {
         configuration.label
             .frame(maxWidth: .infinity)
             .padding()
-            .background(Color.blue)
+            .background(Color.primary)
             .foregroundColor(.white)
-            .cornerRadius(15)
+            .cornerRadius(10)
             .scaleEffect(configuration.isPressed ? 0.95 : 1.0)
     }
 }

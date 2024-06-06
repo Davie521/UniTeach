@@ -206,28 +206,51 @@ struct StudentCardView: View {
     let student: DatabaseUser
     
     var body: some View {
-        HStack {
+        HStack(alignment: .top, spacing: 16) {
             AvatarView()
-            VStack(alignment: .leading) {
+                .frame(width: 50, height: 50)
+                .clipShape(Circle())
+                .shadow(radius: 2)
+            
+            VStack(alignment: .leading, spacing: 8) {
                 Text(student.userName)
                     .font(.headline)
-                    .foregroundColor(.black)
+                    .foregroundColor(.primary)
+                
                 Text(student.university)
                     .font(.subheadline)
-                    .foregroundColor(.gray)
+                    .foregroundColor(.secondary)
+                
+                if !student.tags.isEmpty {
+                    HStack {
+                        ForEach(student.tags, id: \.self) { tag in
+                            Text(tag)
+                                .font(.caption)
+                                .padding(.horizontal, 8)
+                                .padding(.vertical, 4)
+                                .background(Color.gray)
+                                .foregroundColor(.white)
+                                .cornerRadius(5)
+                        }
+                    }
+                }
             }
+            
             Spacer()
+            
             Image(systemName: "chevron.right")
                 .foregroundColor(.secondary)
         }
         .padding()
-        .frame(maxWidth: .infinity)
+        .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color.white)
-        .cornerRadius(8)
-        .shadow(radius: 1)
+        .cornerRadius(12)
+        .shadow(color: Color.black.opacity(0.1), radius: 4, x: 0, y: 2)
         .padding(.horizontal)
     }
 }
+
+
 
 struct CommunityCardView: View {
     let community: Community
