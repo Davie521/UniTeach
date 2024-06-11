@@ -10,7 +10,6 @@ final class PersonalViewModel: ObservableObject {
     @Published var errorMessage: String?
     @Published var classesTeaching: [LiveClass] = []
     @Published var classesLearning: [LiveClass] = []
-    @Published var confirmedClassesLearning: [LiveClass] = []
     
     private var db = Firestore.firestore()
     
@@ -87,14 +86,18 @@ final class PersonalViewModel: ObservableObject {
             try await LiveClassManager.shared.confirmLiveClass(classId: liveClass.id)
             DispatchQueue.main.async {
                 self.classesLearning.removeAll { $0.id == liveClass.id }
-                self.confirmedClassesLearning.append(liveClass)
+                
             }
         } catch {
             DispatchQueue.main.async {
                 self.errorMessage = "Failed to confirm class: \(error.localizedDescription)"
             }
+            
         }
+        print("Confirmed class")
+        await loadCurrentUser()
     }
+
 }
 
 struct PersonalView: View {
@@ -162,7 +165,7 @@ struct PersonalView: View {
                                         .foregroundColor(.gray)
                                 } else {
                                     ForEach(viewModel.classesTeaching) { liveClass in
-                                        LiveClassCardView(liveClass: liveClass)
+                                        LiveClassCardView(liveClass: liveClass, viewModelModel: viewModel)
                                     }
                                 }
                             }
@@ -179,7 +182,7 @@ struct PersonalView: View {
                                 } else {
                                     ForEach(viewModel.classesLearning) { liveClass in
                                         if(!liveClass.confirmed) {
-                                            LiveClassCardView(liveClass: liveClass)
+                                            LiveClassCardView(liveClass: liveClass, viewModelModel: viewModel)
                                         }
                                     }
                                 }
@@ -206,6 +209,7 @@ struct PersonalView: View {
 
 struct LiveClassCardView: View {
     var liveClass: LiveClass
+    var viewModelModel: PersonalViewModel
     @State private var showReview = false
     
     var body: some View {
@@ -241,7 +245,7 @@ struct LiveClassCardView: View {
                 .foregroundColor(.white)
                 .cornerRadius(10)
                 .sheet(isPresented: $showReview) {
-                    ReviewView(liveClass: liveClass)
+                    ReviewView(liveClass: liveClass, viewModel: viewModelModel)
                 }
             }
         }

@@ -3,7 +3,7 @@ import SwiftUI
 struct ClassDetailView: View {
     var baseClass: BaseClass
     @State private var showRegistrationView = false
-
+    
     var body: some View {
         ScrollView {
             VStack(spacing: 20) {
@@ -44,7 +44,7 @@ struct ClassDetailView: View {
                         .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 5)
                 }
                 .padding(.horizontal)
-
+                
                 // Reviews Section
                 VStack(alignment: .leading, spacing: 10) {
                     Text("Reviews")
@@ -52,7 +52,10 @@ struct ClassDetailView: View {
                         .fontWeight(.bold)
                         .frame(maxWidth: .infinity, alignment: .leading)
                     
-                    if baseClass.reviews.isEmpty {
+                    let filteredReviews = baseClass.reviews.filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
+                    let randomReviews = filteredReviews.shuffled().prefix(5)
+                    
+                    if randomReviews.isEmpty {
                         Text("No reviews available.")
                             .foregroundColor(.gray)
                             .padding()
@@ -60,7 +63,7 @@ struct ClassDetailView: View {
                             .cornerRadius(10)
                             .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 5)
                     } else {
-                        ForEach(baseClass.reviews, id: \.self) { review in
+                        ForEach(randomReviews, id: \.self) { review in
                             Text(review)
                                 .padding()
                                 .background(Color(.secondarySystemBackground))
@@ -70,9 +73,9 @@ struct ClassDetailView: View {
                     }
                 }
                 .padding(.horizontal)
-
+                
                 Spacer()
-
+                
                 // Enroll Button
                 Button(action: {
                     showRegistrationView = true
@@ -103,78 +106,78 @@ struct ClassDetailView: View {
 
 struct RegisterClassView: View {
     var baseClass: BaseClass
-       @State private var selectedDate = Date()
-       @State private var duration = 60
-       @State private var note = ""
-       @State private var showAlert = false  // State to manage alert visibility
-       @Environment(\.dismiss) var dismiss
-
-       var body: some View {
-           NavigationView {
-               VStack(spacing: 20) {
-                   DatePicker("Select Date and Time", selection: $selectedDate, displayedComponents: [.date, .hourAndMinute])
-                       .datePickerStyle(CompactDatePickerStyle())
-                       .padding()
-
-                   Picker("Select Duration", selection: $duration) {
-                       Text("20 min").tag(20)
-                       Text("30 min").tag(30)
-                       Text("60 min").tag(60)
-                       Text("90 min").tag(90)
-                       Text("120 min").tag(120)
-                   }
-                   .pickerStyle(SegmentedPickerStyle())
-                   .padding()
-
-                   VStack(alignment: .leading) {
-                       Text("Enter a note")
-                           .font(.headline)
-                           .padding(.bottom, 5)
-
-                       TextEditor(text: $note)
-                           .frame(height: 100)
-                           .padding(10)
-                           .background(Color(.secondarySystemBackground))
-                           .cornerRadius(10)
-                           .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 5)
-                   }
-                   .padding(.horizontal)
-
-                   Spacer()
-
-                   Button(action: {
-                       createLiveClass()
-                       showAlert = true  // Set showAlert to true to show the alert
-                   }) {
-                       Text("Confirm")
-                           .frame(maxWidth: .infinity)
-                           .padding()
-                           .background(Color.blue)
-                           .foregroundColor(.white)
-                           .cornerRadius(15)
-                           .shadow(color: Color.black.opacity(0.2), radius: 10, x: 0, y: 5)
-                   }
-                   .padding(.horizontal)
-                   .padding(.bottom)
-                   .alert(isPresented: $showAlert) {
-                       Alert(
-                           title: Text("Payment Success"),
-                           message: Text("Your payment has been successfully processed."),
-                           dismissButton: .default(Text("OK"))
-                       )
-                   }
-               }
-               .padding()
-               .toolbar {
-                   ToolbarItem(placement: .cancellationAction) {
-                       Button("Cancel") {
-                           dismiss()
-                       }
-                   }
-               }
-           }
-       }
-
+    @State private var selectedDate = Date()
+    @State private var duration = 60
+    @State private var note = ""
+    @State private var showAlert = false  // State to manage alert visibility
+    @Environment(\.dismiss) var dismiss
+    
+    var body: some View {
+        NavigationView {
+            VStack(spacing: 20) {
+                DatePicker("Select Date and Time", selection: $selectedDate, displayedComponents: [.date, .hourAndMinute])
+                    .datePickerStyle(CompactDatePickerStyle())
+                    .padding()
+                
+                Picker("Select Duration", selection: $duration) {
+                    Text("20 min").tag(20)
+                    Text("30 min").tag(30)
+                    Text("60 min").tag(60)
+                    Text("90 min").tag(90)
+                    Text("120 min").tag(120)
+                }
+                .pickerStyle(SegmentedPickerStyle())
+                .padding()
+                
+                VStack(alignment: .leading) {
+                    Text("Enter a note")
+                        .font(.headline)
+                        .padding(.bottom, 5)
+                    
+                    TextEditor(text: $note)
+                        .frame(height: 100)
+                        .padding(10)
+                        .background(Color(.secondarySystemBackground))
+                        .cornerRadius(10)
+                        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 5)
+                }
+                .padding(.horizontal)
+                
+                Spacer()
+                
+                Button(action: {
+                    createLiveClass()
+                    showAlert = true  // Set showAlert to true to show the alert
+                }) {
+                    Text("Confirm")
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(15)
+                        .shadow(color: Color.black.opacity(0.2), radius: 10, x: 0, y: 5)
+                }
+                .padding(.horizontal)
+                .padding(.bottom)
+                .alert(isPresented: $showAlert) {
+                    Alert(
+                        title: Text("Payment Success"),
+                        message: Text("Your payment has been successfully processed."),
+                        dismissButton: .default(Text("OK"))
+                    )
+                }
+            }
+            .padding()
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                }
+            }
+        }
+    }
+    
     private func createLiveClass() {
         let userID = UserDefaults.standard.string(forKey: "userID") ?? "No user ID found"
         let newLiveClass = LiveClass(

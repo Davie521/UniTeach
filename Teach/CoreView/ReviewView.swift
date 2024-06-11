@@ -8,6 +8,7 @@ struct ReviewView: View {
     
     private let maxCommentLength = 200
     var liveClass: LiveClass
+    var viewModel: PersonalViewModel
     @Environment(\.dismiss) var dismiss
     
     var body: some View {
@@ -77,16 +78,19 @@ struct ReviewView: View {
     
     private func submitReview() async throws {
         let updatedBaseClass = try await ClassManager.shared.getBaseClass(classId: liveClass.classid)
-        try await LiveClassManager.shared.confirmLiveClass(classId: liveClass.id)
+        await viewModel.confirmLearningClass(liveClass)
+        
         let newTotalReviews = Double(updatedBaseClass.reviews.count + 1)
         updatedBaseClass.rating = ((updatedBaseClass.rating * (newTotalReviews - 1)) + rating) / newTotalReviews
-        updatedBaseClass.reviews.append(comment)
+        if !comment.isEmpty {
+            updatedBaseClass.reviews.append(comment)
+        }
         try await ClassManager.shared.updateBaseClass(baseClass: updatedBaseClass)
     }
 }
 
 struct ReviewView_Previews: PreviewProvider {
     static var previews: some View {
-        ReviewView(liveClass: LiveClass(id: "1", name: "Sample Class", classid: "101", teacherId: "T1", studentId: "S1", date: Date(), duration: 60, note: "Sample Note"))
+        ReviewView(liveClass: LiveClass(id: "1", name: "Sample Class", classid: "101", teacherId: "T1", studentId: "S1", date: Date(), duration: 60, note: "Sample Note"), viewModel: PersonalViewModel())
     }
 }
