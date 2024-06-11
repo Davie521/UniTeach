@@ -21,6 +21,7 @@ class LiveClass: Codable, Identifiable {
     var note: String
     var confirmed: Bool
     
+    
     init(id: String, name: String, classid: String, teacherId: String, studentId: String, date: Date, duration: Int, note: String) {
         self.id = id
         self.name = name

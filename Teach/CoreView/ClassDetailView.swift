@@ -3,7 +3,8 @@ import SwiftUI
 struct ClassDetailView: View {
     var baseClass: BaseClass
     @State private var showRegistrationView = false
-    
+    @State private var showAllReviews = false  // This will control the sheet presentation
+
     var body: some View {
         ScrollView {
             VStack(spacing: 20) {
@@ -47,13 +48,22 @@ struct ClassDetailView: View {
                 
                 // Reviews Section
                 VStack(alignment: .leading, spacing: 10) {
-                    Text("Reviews")
-                        .font(.title2)
-                        .fontWeight(.bold)
-                        .frame(maxWidth: .infinity, alignment: .leading)
+                    HStack {
+                        Text("Reviews")
+                            .font(.title2)
+                            .fontWeight(.bold)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        
+                        Spacer()
+
+                        Button("Show All") {
+                            showAllReviews = true
+                        }
+                        .foregroundColor(Color.gray)
+                    }
                     
                     let filteredReviews = baseClass.reviews.filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
-                    let randomReviews = filteredReviews.shuffled().prefix(5)
+                    let randomReviews = filteredReviews.shuffled().prefix(3)
                     
                     if randomReviews.isEmpty {
                         Text("No reviews available.")
@@ -97,9 +107,31 @@ struct ClassDetailView: View {
             }
             .padding()
             .navigationTitle("Class Details")
+            .sheet(isPresented: $showRegistrationView) {
+                RegisterClassView(baseClass: baseClass)
+            }
+            .sheet(isPresented: $showAllReviews) {
+                AllReviewsView(reviews: baseClass.reviews)
+            }
         }
-        .sheet(isPresented: $showRegistrationView) {
-            RegisterClassView(baseClass: baseClass)
+    }
+}
+struct AllReviewsView: View {
+    var reviews: [String]
+    
+    var body: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 10) {
+                ForEach(reviews, id: \.self) { review in
+                    Text(review)
+                        .padding()
+                        .background(Color(.secondarySystemBackground))
+                        .cornerRadius(10)
+                        .shadow(color: Color.black.opacity(0.1), radius: 5, x: 0, y: 5)
+                }
+            }
+            .padding()
+            .navigationTitle("All Reviews")
         }
     }
 }

@@ -7,6 +7,8 @@
 
 import SwiftUI
 
+import SwiftUI
+
 struct DesktopView: View {
     @Binding var showLogInView: Bool
     @StateObject private var settingsModel = SettingsModel() // Instantiate SettingsModel
@@ -21,6 +23,13 @@ struct DesktopView: View {
             NavigationView {
                 PersonalView()
                     .toolbar {
+                        // Add Calendar Icon in the Navigation Bar
+                        ToolbarItem(placement: .navigationBarLeading) {
+                            NavigationLink(destination: ScheduleView()) {
+                                Image(systemName: "calendar").font(.headline).foregroundColor(.black)
+                            }
+                        }
+                        // Existing Settings Icon
                         ToolbarItem(placement: .navigationBarTrailing) {
                             NavigationLink(destination: SettingView(showLogInView: $showLogInView, settingsModel: settingsModel)) {
                                 Image(systemName: "gearshape.fill").font(.headline).foregroundColor(.black)
@@ -34,6 +43,7 @@ struct DesktopView: View {
         }
     }
 }
+
 
 struct DesktopView_Previews: PreviewProvider {
     static var previews: some View {

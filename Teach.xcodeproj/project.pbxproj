@@ -32,6 +32,7 @@
 		DDC196652C03745A00403717 /* SignUpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC196642C03745A00403717 /* SignUpView.swift */; };
 		DDC196692C0380D600403717 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC196682C0380D600403717 /* RootView.swift */; };
 		DDC1966B2C03840200403717 /* SettingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDC1966A2C03840200403717 /* SettingView.swift */; };
+		DDFE61FE2C18F23600D428EE /* ScheduleView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DDFE61FD2C18F23600D428EE /* ScheduleView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -56,6 +57,7 @@
 		DDC196642C03745A00403717 /* SignUpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignUpView.swift; sourceTree = "<group>"; };
 		DDC196682C0380D600403717 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		DDC1966A2C03840200403717 /* SettingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingView.swift; sourceTree = "<group>"; };
+		DDFE61FD2C18F23600D428EE /* ScheduleView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScheduleView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -96,6 +98,7 @@
 				DD7973982C0F40010070FE42 /* EditClassView.swift */,
 				DD79739A2C10C6990070FE42 /* ClassDetailView.swift */,
 				DD498F3C2C11FF320094263A /* ReviewView.swift */,
+				DDFE61FD2C18F23600D428EE /* ScheduleView.swift */,
 			);
 			path = CoreView;
 			sourceTree = "<group>";
@@ -243,6 +246,7 @@
 				DD498F392C1132190094263A /* LiveClassManager.swift in Sources */,
 				DD2D16B82C06440200C31F60 /* PersonalView.swift in Sources */,
 				DDC1966B2C03840200403717 /* SettingView.swift in Sources */,
+				DDFE61FE2C18F23600D428EE /* ScheduleView.swift in Sources */,
 				DD2D16BC2C0674AD00C31F60 /* SearchView.swift in Sources */,
 				DD7973992C0F40010070FE42 /* EditClassView.swift in Sources */,
 				DDC196652C03745A00403717 /* SignUpView.swift in Sources */,

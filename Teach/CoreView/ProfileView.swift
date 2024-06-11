@@ -193,6 +193,6 @@ struct RatingView: View {
 
 struct ProfileView_Previews: PreviewProvider {
     static var previews: some View {
-        ProfileView(user: .constant(DatabaseUser(userId: "1", userName: "John Doe", isTeacher: true, university: "Harvard", tags: ["Math", "Science"], availability: "Monday - Friday")))
+        ProfileView(user: .constant(DatabaseUser(userId: "1", userName: "John Doe", isTeacher: true, university: "Harvard", tags: ["Math", "Science"])))
     }
 }

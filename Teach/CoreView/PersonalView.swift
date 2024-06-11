@@ -14,7 +14,7 @@ final class PersonalViewModel: ObservableObject {
     private var db = Firestore.firestore()
     
     init() {
-        user = DatabaseUser(userId: "", userName: "", isTeacher: false, university: "", tags: [], availability: "")
+        user = DatabaseUser(userId: "", userName: "", isTeacher: false, university: "", tags: [])
     }
     
     func loadCurrentUser() async {

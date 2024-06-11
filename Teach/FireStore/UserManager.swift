@@ -9,6 +9,13 @@ import Foundation
 import FirebaseFirestore
 import FirebaseFirestoreSwift
 
+
+struct TimeSlot: Codable {
+    var startTime: Timestamp
+    var endTime: Timestamp
+}
+
+
 struct DatabaseUser: Codable, Identifiable {
     var id: String
     let email: String
@@ -20,11 +27,10 @@ struct DatabaseUser: Codable, Identifiable {
     var enrolledCourseNumber: Int
     var teachingCourseNumber: Int
     var tags: [String]
-    var availability: String
+    var availability: [String: [TimeSlot]]
     var baseClasses: [String] = []
-    
-    
-    
+    var weeklyPlan: WeeklyPlan
+
     
     init(auth: AuthDataResultModel) {
         self.id = auth.uid
@@ -36,12 +42,14 @@ struct DatabaseUser: Codable, Identifiable {
         self.enrolledCourseNumber = 0
         self.teachingCourseNumber = 0
         self.tags = []
-        self.availability = ""
+        self.availability = [:]
         self.userName = "Student"
+        self.baseClasses = []
+        self.weeklyPlan = WeeklyPlan()
         
     }
     
-    init(userId: String, userName: String, isTeacher: Bool, university: String, tags: [String], availability: String) {
+    init(userId: String, userName: String, isTeacher: Bool, university: String, tags: [String]) {
         self.id = userId
         self.email = "test1@test.com"
         self.photoUrl = nil
@@ -52,7 +60,9 @@ struct DatabaseUser: Codable, Identifiable {
         self.enrolledCourseNumber = 0
         self.teachingCourseNumber = 0
         self.tags = tags
-        self.availability = availability
+        self.availability = [:]
+        self.baseClasses = []
+        self.weeklyPlan = WeeklyPlan()
     }
     
     mutating func updateTeacherStatus() {
