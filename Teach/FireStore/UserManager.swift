@@ -11,8 +11,8 @@ import FirebaseFirestoreSwift
 
 
 struct TimeSlot: Codable {
-    var startTime: Timestamp
-    var endTime: Timestamp
+    var startTime: DateComponents
+    var endTime: DateComponents
 }
 
 

@@ -136,20 +136,27 @@ struct AllReviewsView: View {
     }
 }
 
+import SwiftUI
+
 struct RegisterClassView: View {
     var baseClass: BaseClass
     @State private var selectedDate = Date()
+    @State private var availableTimeSlots: [Date] = []
+    @State private var selectedTimeSlot: Date? = nil
     @State private var duration = 60
     @State private var note = ""
     @State private var showAlert = false  // State to manage alert visibility
     @Environment(\.dismiss) var dismiss
-    
+
     var body: some View {
         NavigationView {
             VStack(spacing: 20) {
-                DatePicker("Select Date and Time", selection: $selectedDate, displayedComponents: [.date, .hourAndMinute])
+                DatePicker("Select Date", selection: $selectedDate, displayedComponents: [.date])
                     .datePickerStyle(CompactDatePickerStyle())
                     .padding()
+                    .onChange(of: selectedDate, perform: { _ in
+                        fetchAvailableTimeSlots()
+                    })
                 
                 Picker("Select Duration", selection: $duration) {
                     Text("20 min").tag(20)
@@ -160,6 +167,27 @@ struct RegisterClassView: View {
                 }
                 .pickerStyle(SegmentedPickerStyle())
                 .padding()
+                .onChange(of: duration, perform: { _ in
+                    fetchAvailableTimeSlots()
+                })
+                
+                Text("Select Available Time Slot")
+                    .font(.headline)
+                
+                if availableTimeSlots.isEmpty {
+                    Text("No available time slots.")
+                        .foregroundColor(.red)
+                } else {
+                    Picker("Select Time Slot", selection: $selectedTimeSlot) {
+                        ForEach(availableTimeSlots, id: \.self) { timeSlot in
+                            Text("\(timeSlot, formatter: timeFormatter)")
+                                .tag(timeSlot as Date?)
+                        }
+                    }
+                    .pickerStyle(WheelPickerStyle())
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                }
                 
                 VStack(alignment: .leading) {
                     Text("Enter a note")
@@ -191,10 +219,11 @@ struct RegisterClassView: View {
                 }
                 .padding(.horizontal)
                 .padding(.bottom)
+                .disabled(selectedTimeSlot == nil)  // Disable button if no time slot is selected
                 .alert(isPresented: $showAlert) {
                     Alert(
-                        title: Text("Payment Success"),
-                        message: Text("Your payment has been successfully processed."),
+                        title: Text("Class Scheduled"),
+                        message: Text("Your class has been successfully scheduled."),
                         dismissButton: .default(Text("OK"))
                     )
                 }
@@ -207,10 +236,63 @@ struct RegisterClassView: View {
                     }
                 }
             }
+            .onAppear(perform: fetchAvailableTimeSlots)  // Fetch available time slots when the view appears
         }
     }
     
+    private func fetchAvailableTimeSlots() {
+        let teacherId = baseClass.teacherId
+        
+        Task {
+            do {
+                let user = try await UserManager.shared.getUser(userId: teacherId)
+                let availability = user.availability  // assuming this returns [String: [TimeSlot]]
+                
+                let dateFormatter = DateFormatter()
+                dateFormatter.dateFormat = "yyyy-MM-dd"
+                
+                let selectedDateString = dateFormatter.string(from: selectedDate)
+                
+                
+                if let timeSlots = availability[selectedDateString] {
+                    let calendar = Calendar.current
+                    availableTimeSlots = generateTimeSlots(from: timeSlots, for: duration, on: selectedDate, using: calendar)
+                } else {
+                    availableTimeSlots = []
+                }
+            } catch {
+                print("Failed to fetch user availability: \(error)")
+                availableTimeSlots = []
+            }
+        }
+    }
+    
+    private func generateTimeSlots(from timeSlots: [TimeSlot], for duration: Int, on date: Date, using calendar: Calendar) -> [Date] {
+        var slots: [Date] = []
+        
+        for timeSlot in timeSlots {
+            guard let startTime = calendar.date(from: timeSlot.startTime),
+                  let endTime = calendar.date(from: timeSlot.endTime) else { continue }
+            
+            var slotTime = startTime
+            while slotTime.addingTimeInterval(TimeInterval(duration * 60)) <= endTime {
+                slots.append(slotTime)
+                slotTime = slotTime.addingTimeInterval(5 * 60)  // Increment by 5 minutes
+            }
+        }
+        
+        return slots
+    }
+    
+    private var timeFormatter: DateFormatter {
+        let formatter = DateFormatter()
+        formatter.dateStyle = .none
+        formatter.timeStyle = .short
+        return formatter
+    }
+    
     private func createLiveClass() {
+        guard let selectedTimeSlot = selectedTimeSlot else { return }
         let userID = UserDefaults.standard.string(forKey: "userID") ?? "No user ID found"
         let newLiveClass = LiveClass(
             id: UUID().uuidString,
@@ -218,7 +300,7 @@ struct RegisterClassView: View {
             classid: baseClass.id,
             teacherId: baseClass.teacherId,
             studentId: userID,
-            date: selectedDate,
+            date: selectedTimeSlot,
             duration: duration,
             note: note
         )
