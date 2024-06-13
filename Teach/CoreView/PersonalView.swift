@@ -59,7 +59,7 @@ final class PersonalViewModel: ObservableObject {
             let fetchedClasses = try await LiveClassManager.shared.getClassTeaching(userId: userId)
             DispatchQueue.main.async {
                 let currentDate = Date()
-                self.classesTeaching = fetchedClasses.filter { $0.date > currentDate }.sorted(by: { $0.date > $1.date })
+                self.classesTeaching = fetchedClasses.filter { $0.date > currentDate }.sorted(by: { $0.date < $1.date })
             }
         } catch {
             DispatchQueue.main.async {
@@ -72,7 +72,7 @@ final class PersonalViewModel: ObservableObject {
         do {
             let fetchedClasses = try await LiveClassManager.shared.getClassLearning(userId: userId)
             DispatchQueue.main.async {
-                self.classesLearning = fetchedClasses.filter { !$0.confirmed }.sorted(by: { $0.date > $1.date })
+                self.classesLearning = fetchedClasses.filter { !$0.confirmed }.sorted(by: { $0.date < $1.date })
             }
         } catch {
             DispatchQueue.main.async {

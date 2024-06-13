@@ -89,6 +89,7 @@ struct ClassDetailView: View {
                 // Enroll Button
                 Button(action: {
                     showRegistrationView = true
+                    print("Enroll button tapped")
                 }) {
                     Text("Enroll")
                         .frame(maxWidth: .infinity)
@@ -145,7 +146,7 @@ struct RegisterClassView: View {
     @State private var selectedTimeSlot: Date? = nil
     @State private var duration = 60
     @State private var note = ""
-    @State private var showAlert = false  // State to manage alert visibility
+    @State private var showAlert = false
     @Environment(\.dismiss) var dismiss
 
     var body: some View {
@@ -154,9 +155,9 @@ struct RegisterClassView: View {
                 DatePicker("Select Date", selection: $selectedDate, displayedComponents: [.date])
                     .datePickerStyle(CompactDatePickerStyle())
                     .padding()
-                    .onChange(of: selectedDate, perform: { _ in
+                    .onChange(of: selectedDate) { _ in
                         fetchAvailableTimeSlots()
-                    })
+                    }
                 
                 Picker("Select Duration", selection: $duration) {
                     Text("20 min").tag(20)
@@ -167,9 +168,9 @@ struct RegisterClassView: View {
                 }
                 .pickerStyle(SegmentedPickerStyle())
                 .padding()
-                .onChange(of: duration, perform: { _ in
+                .onChange(of: duration) { _ in
                     fetchAvailableTimeSlots()
-                })
+                }
                 
                 Text("Select Available Time Slot")
                     .font(.headline)
@@ -207,7 +208,8 @@ struct RegisterClassView: View {
                 
                 Button(action: {
                     createLiveClass()
-                    showAlert = true  // Set showAlert to true to show the alert
+                    showAlert = true
+                    print("Confirm button tapped")
                 }) {
                     Text("Confirm")
                         .frame(maxWidth: .infinity)
@@ -219,7 +221,7 @@ struct RegisterClassView: View {
                 }
                 .padding(.horizontal)
                 .padding(.bottom)
-                .disabled(selectedTimeSlot == nil)  // Disable button if no time slot is selected
+                .disabled(selectedTimeSlot == nil)
                 .alert(isPresented: $showAlert) {
                     Alert(
                         title: Text("Class Scheduled"),
@@ -236,7 +238,7 @@ struct RegisterClassView: View {
                     }
                 }
             }
-            .onAppear(perform: fetchAvailableTimeSlots)  // Fetch available time slots when the view appears
+            .onAppear(perform: fetchAvailableTimeSlots)
         }
     }
     
@@ -246,17 +248,21 @@ struct RegisterClassView: View {
         Task {
             do {
                 let user = try await UserManager.shared.getUser(userId: teacherId)
-                let availability = user.availability  // assuming this returns [String: [TimeSlot]]
+                let availability = user.availability
                 
                 let dateFormatter = DateFormatter()
                 dateFormatter.dateFormat = "yyyy-MM-dd"
                 
                 let selectedDateString = dateFormatter.string(from: selectedDate)
                 
-                
                 if let timeSlots = availability[selectedDateString] {
                     let calendar = Calendar.current
                     availableTimeSlots = generateTimeSlots(from: timeSlots, for: duration, on: selectedDate, using: calendar)
+                    
+                    // Set the first available time slot as the default selected time slot if available
+                    if let firstSlot = availableTimeSlots.first {
+                        selectedTimeSlot = firstSlot
+                    }
                 } else {
                     availableTimeSlots = []
                 }
@@ -266,23 +272,29 @@ struct RegisterClassView: View {
             }
         }
     }
+
     
     private func generateTimeSlots(from timeSlots: [TimeSlot], for duration: Int, on date: Date, using calendar: Calendar) -> [Date] {
-        var slots: [Date] = []
-        
-        for timeSlot in timeSlots {
-            guard let startTime = calendar.date(from: timeSlot.startTime),
-                  let endTime = calendar.date(from: timeSlot.endTime) else { continue }
+            var slots: [Date] = []
             
-            var slotTime = startTime
-            while slotTime.addingTimeInterval(TimeInterval(duration * 60)) <= endTime {
-                slots.append(slotTime)
-                slotTime = slotTime.addingTimeInterval(5 * 60)  // Increment by 5 minutes
+            for timeSlot in timeSlots {
+                guard let startTimeHour = timeSlot.startTime.hour,
+                      let startTimeMinute = timeSlot.startTime.minute,
+                      let endTimeHour = timeSlot.endTime.hour,
+                      let endTimeMinute = timeSlot.endTime.minute,
+                      let startTime = calendar.date(bySettingHour: startTimeHour, minute: startTimeMinute, second: 0, of: date),
+                      let endTime = calendar.date(bySettingHour: endTimeHour, minute: endTimeMinute, second: 0, of: date) else { continue }
+                
+                var slotTime = startTime
+                while slotTime.addingTimeInterval(TimeInterval(duration * 60)) <= endTime {
+                    slots.append(slotTime)
+                    slotTime = slotTime.addingTimeInterval(5 * 60)
+                }
             }
+            
+            return slots
         }
-        
-        return slots
-    }
+
     
     private var timeFormatter: DateFormatter {
         let formatter = DateFormatter()
@@ -293,6 +305,7 @@ struct RegisterClassView: View {
     
     private func createLiveClass() {
         guard let selectedTimeSlot = selectedTimeSlot else { return }
+        print(selectedTimeSlot, duration, note)
         let userID = UserDefaults.standard.string(forKey: "userID") ?? "No user ID found"
         let newLiveClass = LiveClass(
             id: UUID().uuidString,
@@ -307,6 +320,8 @@ struct RegisterClassView: View {
         Task {
             do {
                 try await LiveClassManager.shared.createLiveClass(liveClass: newLiveClass)
+                // update the teacher's availability
+                
                 dismiss()
             } catch {
                 print("Failed to create live class: \(error)")
@@ -314,6 +329,7 @@ struct RegisterClassView: View {
         }
     }
 }
+
 
 struct ClassDetailView_Previews: PreviewProvider {
     static var previews: some View {

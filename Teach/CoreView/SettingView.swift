@@ -50,6 +50,7 @@ class SettingsModel: ObservableObject {
         } catch {
             errorMessage = "Failed to update class: \(error.localizedDescription)"
         }
+        await loadCurrentUser()
     }
 
     func removeClass(_ baseClass: BaseClass) async {

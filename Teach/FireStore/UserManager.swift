@@ -147,6 +147,4 @@ final class UserManager {
     
     
     
-    
-    
 }
