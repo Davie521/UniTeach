@@ -380,7 +380,7 @@ struct ScheduleView: View {
             }
 
             // Check if availability for this day already exists
-            if user.availability[dayString]?.isEmpty ?? true{
+//            if user.availability[dayString]?.isEmpty ?? true{
                 // Fetch the time slots for the given day from the weekly plan
                 let timeSlots = weeklyPlan.slots(for: dayOfWeek)
                 var newTimeSlots: [TimeSlot] = []
@@ -403,7 +403,7 @@ struct ScheduleView: View {
                 
                 // Update the user's availability
                 user.availability[dayString] = newTimeSlots
-            }
+//            }
         }
     
     }

@@ -4,7 +4,7 @@ struct ClassDetailView: View {
     var baseClass: BaseClass
     @State private var showRegistrationView = false
     @State private var showAllReviews = false  // This will control the sheet presentation
-
+    
     var body: some View {
         ScrollView {
             VStack(spacing: 20) {
@@ -55,7 +55,7 @@ struct ClassDetailView: View {
                             .frame(maxWidth: .infinity, alignment: .leading)
                         
                         Spacer()
-
+                        
                         Button("Show All") {
                             showAllReviews = true
                         }
@@ -148,7 +148,7 @@ struct RegisterClassView: View {
     @State private var note = ""
     @State private var showAlert = false
     @Environment(\.dismiss) var dismiss
-
+    
     var body: some View {
         NavigationView {
             VStack(spacing: 20) {
@@ -272,29 +272,29 @@ struct RegisterClassView: View {
             }
         }
     }
-
+    
     
     private func generateTimeSlots(from timeSlots: [TimeSlot], for duration: Int, on date: Date, using calendar: Calendar) -> [Date] {
-            var slots: [Date] = []
+        var slots: [Date] = []
+        
+        for timeSlot in timeSlots {
+            guard let startTimeHour = timeSlot.startTime.hour,
+                  let startTimeMinute = timeSlot.startTime.minute,
+                  let endTimeHour = timeSlot.endTime.hour,
+                  let endTimeMinute = timeSlot.endTime.minute,
+                  let startTime = calendar.date(bySettingHour: startTimeHour, minute: startTimeMinute, second: 0, of: date),
+                  let endTime = calendar.date(bySettingHour: endTimeHour, minute: endTimeMinute, second: 0, of: date) else { continue }
             
-            for timeSlot in timeSlots {
-                guard let startTimeHour = timeSlot.startTime.hour,
-                      let startTimeMinute = timeSlot.startTime.minute,
-                      let endTimeHour = timeSlot.endTime.hour,
-                      let endTimeMinute = timeSlot.endTime.minute,
-                      let startTime = calendar.date(bySettingHour: startTimeHour, minute: startTimeMinute, second: 0, of: date),
-                      let endTime = calendar.date(bySettingHour: endTimeHour, minute: endTimeMinute, second: 0, of: date) else { continue }
-                
-                var slotTime = startTime
-                while slotTime.addingTimeInterval(TimeInterval(duration * 60)) <= endTime {
-                    slots.append(slotTime)
-                    slotTime = slotTime.addingTimeInterval(5 * 60)
-                }
+            var slotTime = startTime
+            while slotTime.addingTimeInterval(TimeInterval(duration * 60)) <= endTime {
+                slots.append(slotTime)
+                slotTime = slotTime.addingTimeInterval(5 * 60)
             }
-            
-            return slots
         }
-
+        
+        return slots
+    }
+    
     
     private var timeFormatter: DateFormatter {
         let formatter = DateFormatter()
@@ -305,7 +305,6 @@ struct RegisterClassView: View {
     
     private func createLiveClass() {
         guard let selectedTimeSlot = selectedTimeSlot else { return }
-        print(selectedTimeSlot, duration, note)
         let userID = UserDefaults.standard.string(forKey: "userID") ?? "No user ID found"
         let newLiveClass = LiveClass(
             id: UUID().uuidString,
@@ -319,15 +318,115 @@ struct RegisterClassView: View {
         )
         Task {
             do {
+                // Create the live class in the database
                 try await LiveClassManager.shared.createLiveClass(liveClass: newLiveClass)
-                // update the teacher's availability
                 
+                // Fetch the teacher and update their availability
+                var teacher = try await UserManager.shared.getUser(userId: newLiveClass.teacherId)
+                adjustTeacherAvailability(&teacher, with: newLiveClass)
+                try await UserManager.shared.updateUser(user: teacher)
+                
+                // Dismiss the view
                 dismiss()
             } catch {
                 print("Failed to create live class: \(error)")
             }
         }
     }
+    
+    private func adjustTeacherAvailability(_ teacher: inout DatabaseUser, with liveClass: LiveClass) {
+        let calendar = Calendar.current
+        let classStart = liveClass.date
+        let classEnd = classStart.addingTimeInterval(TimeInterval(liveClass.duration * 60)) // convert duration from minutes to seconds
+        let dayString = DateFormatter.yyyyMMdd.string(from: classStart)
+        print(dayString)
+        print(classStart)
+        print(classEnd)
+        
+        if var daySlots = teacher.availability[dayString] {
+            var updatedSlots: [TimeSlot] = []
+            
+            for slot in daySlots {
+                print("Slot: \(slot.startTime) - \(slot.endTime)")
+                // extract date component from the classStart
+               
+                let dateComponents = calendar.dateComponents([.year, .month, .day], from: classStart)
+                            
+                            // Creating new DateComponents for slot start and end times with the date from classStart
+                            var slotStartComponents = DateComponents()
+                            slotStartComponents.year = dateComponents.year
+                            slotStartComponents.month = dateComponents.month
+                            slotStartComponents.day = dateComponents.day
+                            slotStartComponents.hour = slot.startTime.hour
+                            slotStartComponents.minute = slot.startTime.minute
+                            slotStartComponents.second = slot.startTime.second
+                            
+                            var slotEndComponents = DateComponents()
+                            slotEndComponents.year = dateComponents.year
+                            slotEndComponents.month = dateComponents.month
+                            slotEndComponents.day = dateComponents.day
+                            slotEndComponents.hour = slot.endTime.hour
+                            slotEndComponents.minute = slot.endTime.minute
+                            slotEndComponents.second = slot.endTime.second
+                
+                var slotStart = calendar.date(from: slotStartComponents)!
+                var slotEnd = calendar.date(from: slotEndComponents)!
+                
+                
+                
+                // Scenario 1: Class starts and ends within the slot
+                if classStart > slotStart && classEnd < slotEnd {
+                    // Create a slot before the class
+                    updatedSlots.append(TimeSlot(startTime: slot.startTime, endTime: calendar.dateComponents([.hour, .minute], from: classStart)))
+                    
+                    // Create a slot after the class
+                    updatedSlots.append(TimeSlot(startTime: calendar.dateComponents([.hour, .minute], from: classEnd), endTime: slot.endTime))
+                }
+                // Scenario 2: Class starts before the slot and ends within the slot
+                else if classStart <= slotStart && classEnd < slotEnd && classEnd > slotStart {
+                    updatedSlots.append(TimeSlot(startTime: calendar.dateComponents([.hour, .minute], from: classEnd), endTime: slot.endTime))
+                }
+                // Scenario 3: Class starts during the slot and ends after the slot
+                else if classStart > slotStart && classStart < slotEnd && classEnd >= slotEnd {
+                    updatedSlots.append(TimeSlot(startTime: slot.startTime, endTime: calendar.dateComponents([.hour, .minute], from: classStart)))
+                }
+                // Scenario 4: Class completely overlaps the slot
+                else if classStart <= slotStart && classEnd >= slotEnd {
+                    // No slot is added, the entire slot is consumed by the class
+                }
+                // Class does not interfere with the slot
+                else {
+                    updatedSlots.append(slot)  // Add the unchanged slot
+                    print("No interference")
+                }
+            }
+            
+            // Update the day's slots with the newly computed slots
+            teacher.availability[dayString] = updatedSlots
+            print(teacher.availability)
+        }
+    }
+    
+    
+    
+}
+
+
+
+
+extension DateComponents {
+    init(date: Date) {
+        let calendar = Calendar.current
+        self = calendar.dateComponents([.year, .month, .day, .hour, .minute], from: date)
+    }
+}
+
+extension DateFormatter {
+    static let yyyyMMdd: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        return formatter
+    }()
 }
 
 
