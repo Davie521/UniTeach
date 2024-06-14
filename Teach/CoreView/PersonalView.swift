@@ -156,12 +156,12 @@ struct PersonalView: View {
                         }
                         
                         Group {
-                            Text("Teaching Classes")
+                            Text("To Teach")
                                 .font(.headline)
                             
                             VStack(alignment: .leading, spacing: 10) {
                                 if viewModel.classesTeaching.isEmpty {
-                                    Text("No classes available.")
+                                    Text("No lessons available.")
                                         .foregroundColor(.gray)
                                 } else {
                                     ForEach(viewModel.classesTeaching) { liveClass in
@@ -172,12 +172,12 @@ struct PersonalView: View {
                         }
                         
                         Group {
-                            Text("Learning Classes")
+                            Text("To Learn")
                                 .font(.headline)
                             
                             VStack(alignment: .leading, spacing: 10) {
                                 if viewModel.classesLearning.isEmpty {
-                                    Text("No classes available.")
+                                    Text("No lessons available.")
                                         .foregroundColor(.gray)
                                 } else {
                                     ForEach(viewModel.classesLearning) { liveClass in
