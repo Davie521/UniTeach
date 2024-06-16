@@ -129,7 +129,7 @@ struct SettingView: View {
 
     private func classesSection() -> some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Classes")
+            Text("Courses")
                 .font(.title2)
                 .fontWeight(.bold)
                 .foregroundColor(.primary)
