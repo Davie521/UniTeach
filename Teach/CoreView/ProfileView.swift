@@ -107,7 +107,7 @@ struct ProfileView: View {
                         }
                         
                         Group {
-                            Text("Classes")
+                            Text("Courses Offered")
                                 .font(.headline)
                             
                             VStack(alignment: .leading, spacing: 10) {
