@@ -30,8 +30,8 @@
             filePath = "Teach/CoreView/ClassDetailView.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "378"
-            endingLineNumber = "378"
+            startingLineNumber = "379"
+            endingLineNumber = "379"
             landmarkName = "adjustTeacherAvailability(_:with:)"
             landmarkType = "7">
          </BreakpointContent>

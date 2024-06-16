@@ -19,6 +19,7 @@ struct ClassDetailView: View {
                 VStack(alignment: .leading, spacing: 10) {
                     Text("Description")
                         .font(.title2)
+            
                         .fontWeight(.bold)
                         .frame(maxWidth: .infinity, alignment: .leading)
                     
@@ -49,7 +50,7 @@ struct ClassDetailView: View {
                 // Reviews Section
                 VStack(alignment: .leading, spacing: 10) {
                     HStack {
-                        Text("Reviews")
+                        Text("Recent Reviews")
                             .font(.title2)
                             .fontWeight(.bold)
                             .frame(maxWidth: .infinity, alignment: .leading)
